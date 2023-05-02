@@ -1,6 +1,5 @@
-# Roboflow Evaluations 🔎
-
-[Roboflow Evaluations](https://github.com/roboflow/evaluations) is a framework for evaluating the results of computer vision models. Think [OpenAI Evals](https://github.com/openai/evals), but for computer vision models.
+Welcome to the Roboflow evaluations documentation!
+==================================================
 
 Roboflow `evaluations` is a Python package for evaluating computer vision models.
 
@@ -23,19 +22,16 @@ Only Roboflow models are supported to retrieve ground truth, but any model can b
 
 If the device on which an evaluation is run has a CUDA GPU, that GPU will be used for running model inference for Grounding DINO and CLIP. Otherwise, inference is run via CPU.
 
-Here is an example confusion matrix from inference on a single image using Grounding DINO:
-
-![Confusion Matrix](example.png)
-
-## Getting Started
+Getting Started
+---------------
 
 To get started, clone the repository and install the package:
 
-```
-git clone https://github.com/roboflow/evaluation
+.. code-block:: python
 
-pip install -e .
-```
+   git clone https://github.com/roboflow/evaluation
+
+   pip install -e .
 
 See the files in the `examples` directory for demos showing how to start using Roboflow Evaluations with:
 
@@ -48,18 +44,18 @@ For instance, to run an evaluation of a Roboflow model, open up the `examples/ro
 The script will print the following pieces of information to the console:
 
 - An aggregate confusion matrix showing performance of the model on the dataset
-- The precision, accuracy, and f1 score of the model performance
+- The precision, accuracy, and f1 score representing model performance
 
-To use GroundingDINO, run the `dinosetup.sh` script in the root `evaluations` directory. Then, you can use the corresponding `DINOEvaluator` object as documented in the project docs.
+Table of Contents
+-----------------
 
-## License
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
 
-This project is licensed under an [MIT License](LICENSE).
-
-## Contributing
-
-Interested in contributing to evaluations? Check out our [contributing guidelines](CONTRIBUTING.md).
-
-## TODOs
-
-- Show an example aggregate confusion matrix in the README
+   classification
+   object-detection
+   dataloaders
+   modeleval
+   visualize
+   compare

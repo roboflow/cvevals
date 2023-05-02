@@ -1,0 +1,160 @@
+import copy
+import os
+
+from .confusion_matrices import plot_confusion_matrix
+from .eval_images import find_best_prediction, visualize_image_experiment
+
+ACCEPTED_MODES = ["interactive", "batch"]
+
+
+class Evaluator:
+    """
+    Evaluates the output of a model on a dataset.
+    """
+
+    def __init__(
+        self,
+        data: dict = {},
+        predictions: dict = {},
+        ground_truth: dict = {},
+        class_names: list = [],
+        confidence_threshold: int = 0.2,
+        mode: str = "interactive",
+    ) -> None:
+        if mode not in ACCEPTED_MODES:
+            raise ValueError(f"mode must be one of {ACCEPTED_MODES}")
+
+        self.confidence_threshold = confidence_threshold
+        self.mode = mode
+        self.class_names = class_names
+
+        if not os.path.exists("./output/images"):
+            os.makedirs("./output/images")
+
+        if not os.path.exists("./output/matrices"):
+            os.makedirs("./output/matrices")
+
+        merged_data = {}
+
+        for key in predictions.keys():
+            gt = ground_truth.get(key, [])
+
+            merged_data[key] = {
+                "ground_truth": gt["ground_truth"],
+                "predictions": predictions[key]["predictions"],
+                "filename": key,
+            }
+
+        self.data = merged_data
+
+    def eval_model_predictions(self) -> dict:
+        """
+        Compute confusion matrices for a Roboflow, Grounding DINO, and CLIP model.
+
+        Returns:
+            combined_cf (dict): A dictionary with a confusion matrix composed of the result of all inferences.
+        """
+
+        confusion_matrices = {}
+
+        combined_cf = {"fn": 0, "fp": 0}
+        combined_cf = {}
+
+        for i, _ in enumerate(self.class_names):
+            for j, _ in enumerate(self.class_names):
+                combined_cf[(i, j)] = 0
+
+        for key, value in self.data.items():
+            print(
+                "evaluating image predictions against ground truth",
+                key,
+                "...",
+                self.class_names,
+            )
+
+            gt = value["ground_truth"]
+            pred = value["predictions"]
+
+            cf = self.compute_confusion_matrix([gt, pred], self.class_names)
+
+            for k, v in cf.items():
+                combined_cf[k] += v
+
+            confusion_matrices[key] = cf
+
+            if self.mode == "interactive":
+                visualize_image_experiment(value, self.class_names)
+
+                plot_confusion_matrix(cf, self.class_names, False, key, self.mode)
+
+        plot_confusion_matrix(
+            combined_cf, self.class_names, True, "aggregate", self.mode
+        )
+
+        self.combined_cf = combined_cf
+
+        return combined_cf
+
+    def compute_confusion_matrix(
+        self,
+        image_eval_data,
+        class_names,
+        confidence_threshold=0.2,
+    ) -> dict:
+        # image eval data looks like:
+        # {filename: "path/to/image.jpg", ground_truth: [{}, {}, {}, ...], predictions: [{},{},{},...]}
+        # each ground truth is a tuple/list of (x_min, y_min, x_max, y_max, label)
+        # each prediction is a tuple/list of (x_min, y_min, x_max, y_max, label, confidence)
+
+        predictions = copy.deepcopy(image_eval_data[1])
+
+        predictions = [p for p in predictions if p[5] > confidence_threshold]
+        ground_truths = copy.deepcopy(image_eval_data[0])
+
+        confusion_data = {}
+        for i, _ in enumerate(class_names):
+            for j, _ in enumerate(class_names):
+                confusion_data[(i, j)] = 0
+
+        for gt_box in ground_truths:
+            match_idx, match = find_best_prediction(gt_box, predictions)
+
+            if match is None:
+                confusion_data[gt_box[4], len(class_names) - 1] += 1
+            else:
+                predictions.pop(match_idx)
+                confusion_data[gt_box[4], match[4]] += 1
+
+        for p in predictions:
+            confusion_data[len(class_names) - 1, p[4]] += 1
+
+        return confusion_data
+
+    def calculate_statistics(self) -> tuple:
+        """
+        Calculate precision, recall, and f1 score for the evaluation.
+
+        Returns:
+            precision: The precision of the model
+            recall: The recall of the the model
+            f1: The f1 score of the model
+        """
+        cf = self.combined_cf
+
+        precision = 0
+        recall = 0
+        f1 = 0
+
+        fp = cf.get((0, 1))
+        fn = cf.get((1, 0))
+        tp = cf.get((1, 1))
+
+        # prevent division by zero error
+        if tp == 0:
+            tp = 1
+
+        precision += tp / (tp + fp)
+        recall += tp / (tp + fn)
+        f1 += 2 * (precision * recall) / (precision + recall)
+
+        return precision, recall, f1
