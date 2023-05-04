@@ -1,4 +1,5 @@
 import os
+import cv2
 
 import numpy as np
 import roboflow
@@ -56,10 +57,18 @@ class RoboflowDataLoader(DataLoader):
                 width = values[3]
                 height = values[4]
 
+                image = cv2.imread(img_filename)
+
                 x0 = cx - width / 2
                 y0 = cy - height / 2
                 x1 = cx + width / 2
                 y1 = cy + height / 2
+
+                # scale to non-floats
+                x0 = int(x0 * image.shape[1])
+                y0 = int(y0 * image.shape[0])
+                x1 = int(x1 * image.shape[1])
+                y1 = int(y1 * image.shape[0])
 
                 # Add the extracted data to the output list
                 labels.append((x0, y0, x1, y1, label))

@@ -47,7 +47,6 @@ class Evaluator:
         merged_data = {}
 
         for key in predictions.keys():
-            print(key)
             gt = ground_truth.get(key, [])
 
             if gt:
@@ -127,9 +126,9 @@ class Evaluator:
         all_predictions = []
 
         for i in range(len(predictions)):
-            if predictions.confidence[i] > confidence_threshold:
+            if predictions.confidence[i] > confidence_threshold and predictions.class_id[i] is not None:
                 merged_prediction = predictions.xyxy[i].tolist() + [
-                    predictions.class_id[i].tolist()
+                    predictions.class_id[i]
                 ]
 
                 all_predictions.append(merged_prediction)
@@ -186,9 +185,6 @@ class Evaluator:
                 else:  # misclassification
                     fp += cf[(x, y)]
 
-        print(cf)
-        print(tp, fp, fn)
-
         precision = tp / (tp + fp)
 
         if tp + fn == 0:
@@ -196,7 +192,10 @@ class Evaluator:
         else:
             recall = tp / (tp + fn)
 
-        f1 = 2 * (precision * recall) / (precision + recall)
+        if precision + recall == 0:
+            f1 = 0
+        else:
+            f1 = 2 * (precision * recall) / (precision + recall)
 
         return EvaluatorResponse(
             true_positives=tp,
