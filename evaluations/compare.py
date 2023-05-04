@@ -8,11 +8,13 @@ class CompareEvaluations:
 
     def compare(self):
         # find highest f1
-        highest_f1 = 0
+        highest_f1 = -1
         highest_eval = None
 
         for evaluation in self.evaluations:
             cf = evaluation.eval_model_predictions()
+
+            cf = evaluation.combined_cf
 
             data = evaluation.calculate_statistics()
 
@@ -22,7 +24,7 @@ class CompareEvaluations:
                     data.f1,
                     data.precision,
                     data.recall,
-                    evaluation.class_names[0],
+                    evaluation.class_names,
                     cf,
                     evaluation.confidence_threshold,
                 )
