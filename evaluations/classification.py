@@ -25,8 +25,6 @@ class ClassificationEvaluator(Evaluator):
             for j, _ in enumerate(class_names):
                 confusion_data[(i, j)] = 0
 
-        print(result)
-
         is_match = result[0][0] == result[1].predicted_class_names[0]
 
         if is_match:
