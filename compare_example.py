@@ -1,7 +1,7 @@
 import copy
 
 from evaluations import CompareEvaluations
-from evaluations.clip import CLIPEvaluator
+from evaluations.classification import CLIPEvaluator
 from evaluations.dataloaders import (RoboflowDataLoader,
                                      RoboflowPredictionsDataLoader)
 from evaluations.dataloaders.cliploader import CLIPDataLoader

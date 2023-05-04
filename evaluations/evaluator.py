@@ -1,11 +1,20 @@
 import copy
 import os
+from dataclasses import dataclass
 
 from .confusion_matrices import plot_confusion_matrix
 from .eval_images import find_best_prediction, visualize_image_experiment
 
 ACCEPTED_MODES = ["interactive", "batch"]
 
+@dataclass
+class EvaluatorResponse:
+    true_positives: int
+    false_positives: int
+    false_negatives: int
+    precision: float
+    recall: float
+    f1: float
 
 class Evaluator:
     """
@@ -14,7 +23,6 @@ class Evaluator:
 
     def __init__(
         self,
-        data: dict = {},
         predictions: dict = {},
         ground_truth: dict = {},
         class_names: list = [],
@@ -37,10 +45,16 @@ class Evaluator:
         merged_data = {}
 
         for key in predictions.keys():
+            print(key)
             gt = ground_truth.get(key, [])
 
+            if gt:
+                gt = gt["ground_truth"]
+            else:
+                gt = []
+
             merged_data[key] = {
-                "ground_truth": gt["ground_truth"],
+                "ground_truth": gt,
                 "predictions": predictions[key]["predictions"],
                 "filename": key,
             }
@@ -108,7 +122,14 @@ class Evaluator:
 
         predictions = copy.deepcopy(image_eval_data[1])
 
-        predictions = [p for p in predictions if p[5] > confidence_threshold]
+        all_predictions = []
+
+        for i in range(len(predictions)):
+            if predictions.confidence[i] > confidence_threshold:
+                merged_prediction = predictions.xyxy[i].tolist() + [predictions.class_id[i].tolist()]
+
+                all_predictions.append(merged_prediction)
+
         ground_truths = copy.deepcopy(image_eval_data[0])
 
         confusion_data = {}
@@ -117,15 +138,15 @@ class Evaluator:
                 confusion_data[(i, j)] = 0
 
         for gt_box in ground_truths:
-            match_idx, match = find_best_prediction(gt_box, predictions)
+            match_idx, match = find_best_prediction(gt_box, all_predictions)
 
             if match is None:
                 confusion_data[gt_box[4], len(class_names) - 1] += 1
             else:
-                predictions.pop(match_idx)
+                all_predictions.pop(match_idx)
                 confusion_data[gt_box[4], match[4]] += 1
 
-        for p in predictions:
+        for p in all_predictions:
             confusion_data[len(class_names) - 1, p[4]] += 1
 
         return confusion_data
@@ -140,21 +161,40 @@ class Evaluator:
             f1: The f1 score of the model
         """
         cf = self.combined_cf
+        
+        # compute precision, recall, and f1 score
+        tp = 0
+        fp = 0
+        fn = 0
 
-        precision = 0
-        recall = 0
-        f1 = 0
+        for x in range(len(self.class_names)):  # ground truth
+            for y in range(len(self.class_names)):  # predictions
+                if x == len(self.class_names) - 1:  # last column / prediction with no ground truth
+                    fp += cf[(x, y)]
+                elif y == len(self.class_names) - 1:  # bottom row / ground truth with no prediction
+                    fn += cf[(x, y)]
+                elif x == y:  # true positives across the diagonal
+                    tp += cf[(x, y)]
+                else:  # misclassification
+                    fp += cf[(x, y)]
 
-        fp = cf.get((0, 1))
-        fn = cf.get((1, 0))
-        tp = cf.get((1, 1))
+        print(cf)
+        print(tp, fp, fn)
 
-        # prevent division by zero error
-        if tp == 0:
-            tp = 1
+        precision = tp / (tp + fp)
 
-        precision += tp / (tp + fp)
-        recall += tp / (tp + fn)
-        f1 += 2 * (precision * recall) / (precision + recall)
+        if tp + fn == 0:
+            recall = 1
+        else:
+            recall = tp / (tp + fn)
 
-        return precision, recall, f1
+        f1 = 2 * (precision * recall) / (precision + recall)
+
+        return EvaluatorResponse(
+            true_positives=tp,
+            false_positives=fp,
+            false_negatives=fn,
+            precision=precision,
+            recall=recall,
+            f1=f1,
+        )

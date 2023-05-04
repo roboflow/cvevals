@@ -1,22 +1,20 @@
-import glob
-import os
-
-import clip
-import torch
-from PIL import Image
-
 from .evaluator import Evaluator
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
-
-
-class CLIPEvaluator(Evaluator):
+class ClassificationEvaluator(Evaluator):
     """
-    Evaluate CLIP prompts for classification tasks.
+    Evaluate classification models.
     """
 
     def compute_confusion_matrix(self, result: dict, class_names: list) -> dict:
+        """
+        Compute a confusion matrix for a classification model.
 
+        Args:
+            result (dict): A dictionary containing the ground truth and predictions.
+            class_names (list): A list of class names.
+
+        """
+        
         confusion_data = {}
 
         # matrix is
@@ -26,14 +24,14 @@ class CLIPEvaluator(Evaluator):
             for j, _ in enumerate(class_names):
                 confusion_data[(i, j)] = 0
 
-        is_match = result[0][0] == result[1]
+        is_match = result[0][0] == result[1].predicted_class_names[0]
 
         if is_match:
             r0index = class_names.index(result[0][0])
             confusion_data[(r0index, r0index)] += 1
         else:
             r0index = class_names.index(result[0][0])
-            r1index = class_names.index(result[1])
+            r1index = class_names.index(result[1].predicted_class_names[0])
             confusion_data[(r0index, r1index)] += 1
 
         return confusion_data

@@ -2,8 +2,10 @@ import os
 
 import roboflow
 import yaml
+import numpy as np
 
 from .dataloader import DataLoader
+from supervision.detection.core import Detections
 
 
 class RoboflowDataLoader(DataLoader):
@@ -121,7 +123,8 @@ class RoboflowDataLoader(DataLoader):
                             os.path.join(root, file)
                         )
                     else:
-                        ground_truth = []
+                        # folder name
+                        ground_truth = [os.path.basename(root)]
 
                     self.data[os.path.join(root, file)] = {
                         "filename": os.path.join(root, file),
@@ -163,6 +166,8 @@ class RoboflowPredictionsDataLoader(DataLoader):
         prediction_group = [p.json() for p in prediction_group.predictions]
 
         predictions = []
+        class_names = []
+        confidence = []
 
         for p in prediction_group:
             # scale predictions to 0 to 1
@@ -182,9 +187,15 @@ class RoboflowPredictionsDataLoader(DataLoader):
                     y0,
                     x1,
                     y1,
-                    self.class_names.index(p["class"]),
-                    p["confidence"],
                 )
             )
+            class_names.append(self.class_names.index(p["class"]))
+            confidence.append(p["confidence"])
+
+        predictions = Detections(
+            xyxy=np.array(predictions),
+            class_id=np.array(class_names),
+            confidence=np.array(confidence),
+        )
 
         return predictions

@@ -1,5 +1,5 @@
 from evaluations.dataloaders import (RoboflowDataLoader,
-                                     RoboflowPredictionsDataLoader)
+                                    RoboflowPredictionsDataLoader)
 from evaluations.roboflow import RoboflowEvaluator
 
 class_names, data, model = RoboflowDataLoader(
@@ -16,23 +16,12 @@ predictions = RoboflowPredictionsDataLoader(
     class_names=class_names,
 ).process_files()
 
-merged_data = {}
-
-for key, value in predictions.items():
-    gt = data.get(key, [])
-
-    merged_data[key] = {
-        "ground_truth": gt["ground_truth"],
-        "predictions": predictions[key]["predictions"],
-        "filename": key,
-    }
-
-evaluator = RoboflowEvaluator(data=merged_data, class_names=class_names, mode="batch")
+evaluator = RoboflowEvaluator(ground_truth=data, predictions=predictions, class_names=class_names, mode="batch")
 
 cf = evaluator.eval_model_predictions()
 
-precision, recall, f1 = evaluator.calculate_statistics()
+data = evaluator.calculate_statistics()
 
-print("Precision:", precision)
-print("Recall:", recall)
-print("f1 Score:", f1)
+print("Precision:", data.precision)
+print("Recall:", data.recall)
+print("f1 Score:", data.f1)
