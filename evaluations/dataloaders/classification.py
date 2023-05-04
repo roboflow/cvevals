@@ -1,5 +1,6 @@
-from dataclasses import dataclass
 import os
+from dataclasses import dataclass
+
 
 @dataclass
 class ClassificationDetections:
@@ -7,6 +8,7 @@ class ClassificationDetections:
     predicted_class_names: list
     predicted_class_ids: list
     confidence: float
+
 
 class ClassificationFolderDataLoader:
     def __init__(self, directory):

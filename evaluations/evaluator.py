@@ -7,6 +7,7 @@ from .eval_images import find_best_prediction, visualize_image_experiment
 
 ACCEPTED_MODES = ["interactive", "batch"]
 
+
 @dataclass
 class EvaluatorResponse:
     true_positives: int
@@ -15,6 +16,7 @@ class EvaluatorResponse:
     precision: float
     recall: float
     f1: float
+
 
 class Evaluator:
     """
@@ -126,7 +128,9 @@ class Evaluator:
 
         for i in range(len(predictions)):
             if predictions.confidence[i] > confidence_threshold:
-                merged_prediction = predictions.xyxy[i].tolist() + [predictions.class_id[i].tolist()]
+                merged_prediction = predictions.xyxy[i].tolist() + [
+                    predictions.class_id[i].tolist()
+                ]
 
                 all_predictions.append(merged_prediction)
 
@@ -161,7 +165,7 @@ class Evaluator:
             f1: The f1 score of the model
         """
         cf = self.combined_cf
-        
+
         # compute precision, recall, and f1 score
         tp = 0
         fp = 0
@@ -169,9 +173,13 @@ class Evaluator:
 
         for x in range(len(self.class_names)):  # ground truth
             for y in range(len(self.class_names)):  # predictions
-                if x == len(self.class_names) - 1:  # last column / prediction with no ground truth
+                if (
+                    x == len(self.class_names) - 1
+                ):  # last column / prediction with no ground truth
                     fp += cf[(x, y)]
-                elif y == len(self.class_names) - 1:  # bottom row / ground truth with no prediction
+                elif (
+                    y == len(self.class_names) - 1
+                ):  # bottom row / ground truth with no prediction
                     fn += cf[(x, y)]
                 elif x == y:  # true positives across the diagonal
                     tp += cf[(x, y)]

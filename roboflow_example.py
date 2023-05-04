@@ -1,5 +1,5 @@
 from evaluations.dataloaders import (RoboflowDataLoader,
-                                    RoboflowPredictionsDataLoader)
+                                     RoboflowPredictionsDataLoader)
 from evaluations.roboflow import RoboflowEvaluator
 
 class_names, data, model = RoboflowDataLoader(
@@ -16,7 +16,9 @@ predictions = RoboflowPredictionsDataLoader(
     class_names=class_names,
 ).process_files()
 
-evaluator = RoboflowEvaluator(ground_truth=data, predictions=predictions, class_names=class_names, mode="batch")
+evaluator = RoboflowEvaluator(
+    ground_truth=data, predictions=predictions, class_names=class_names, mode="batch"
+)
 
 cf = evaluator.eval_model_predictions()
 

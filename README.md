@@ -2,7 +2,7 @@
 
 # CV Evaluations 🔎
 
-[Roboflow Evaluations](https://github.com/roboflow/evaluations) is a framework for evaluating the results of computer vision models. Think [OpenAI Evals](https://github.com/openai/evals), but for computer vision models.
+`cvevals` is a framework for evaluating the results of computer vision models. Think [OpenAI Evals](https://github.com/openai/evals), but for computer vision models.
 
 Roboflow `evaluations` is a Python package for evaluating computer vision models.
 
@@ -11,7 +11,7 @@ Using evaluations, you can:
 1. Compare ground truth to a Roboflow model to benchmark and visualize model performance on images in bulk;
 2. Test different Grounding DINO prompts to see which one most effectively annotates a specified class in an image;
 3. Test different CLIP prompts to see which one most effectively classifies an image, and;
-4. Evaluate resuts of different confidence levels for active learning.
+4. Evaluate resuts of different confidence levels for active learning (coming soon).
 
 Performance is measured using an aggregate of the following metrics:
 

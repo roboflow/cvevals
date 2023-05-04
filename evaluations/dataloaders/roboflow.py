@@ -1,11 +1,11 @@
 import os
 
+import numpy as np
 import roboflow
 import yaml
-import numpy as np
+from supervision.detection.core import Detections
 
 from .dataloader import DataLoader
-from supervision.detection.core import Detections
 
 
 class RoboflowDataLoader(DataLoader):

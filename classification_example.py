@@ -1,12 +1,13 @@
+import os
+
+import clip
+import torch
+from PIL import Image
+
 from evaluations.classification import ClassificationEvaluator
 from evaluations.dataloaders import RoboflowDataLoader
-
-from PIL import Image
-import os
-import torch
-import clip
-
-from evaluations.dataloaders.classification import ClassificationFolderDataLoader, ClassificationDetections
+from evaluations.dataloaders.classification import (
+    ClassificationDetections, ClassificationFolderDataLoader)
 
 class_names, ground_truth, model = RoboflowDataLoader(
     workspace_url="mit-3xwsm",
@@ -50,7 +51,12 @@ for file in ClassificationFolderDataLoader(IMAGE_PATH).get_files()[1]:
 
     all_predictions[file] = {"filename": file, "predictions": data}
 
-evaluator = ClassificationEvaluator(ground_truth=ground_truth, predictions=all_predictions, class_names=["banana", "apple"], mode="batch")
+evaluator = ClassificationEvaluator(
+    ground_truth=ground_truth,
+    predictions=all_predictions,
+    class_names=["banana", "apple"],
+    mode="batch",
+)
 
 cf = evaluator.eval_model_predictions()
 

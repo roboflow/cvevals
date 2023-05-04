@@ -1,5 +1,6 @@
 from .evaluator import Evaluator
 
+
 class ClassificationEvaluator(Evaluator):
     """
     Evaluate classification models.
@@ -14,7 +15,7 @@ class ClassificationEvaluator(Evaluator):
             class_names (list): A list of class names.
 
         """
-        
+
         confusion_data = {}
 
         # matrix is
@@ -23,6 +24,8 @@ class ClassificationEvaluator(Evaluator):
         for i, _ in enumerate(class_names):
             for j, _ in enumerate(class_names):
                 confusion_data[(i, j)] = 0
+
+        print(result)
 
         is_match = result[0][0] == result[1].predicted_class_names[0]
 
