@@ -1,12 +1,28 @@
-# This script is a WIP
-
-from evaluations.dataloaders import (RoboflowDataLoader)
-from evaluations.roboflow import RoboflowEvaluator
+import base64
+import glob
 import os
-
 from typing import Sequence
 
+import cv2
+import numpy as np
+import supervision as sv
 from google.cloud import vision
+
+from evaluations.dataloaders import RoboflowDataLoader
+from evaluations.roboflow import RoboflowEvaluator
+
+# use absolute path
+EVAL_DATA_PATH = "/Users/james/src/cvevals/dataset-new"
+ROBOFLOW_WORKSPACE_URL = "james-gallagher-87fuq"
+ROBOFLOW_PROJECT_URL = "mug-detector-eocwp"
+ROBOFLOW_MODEL_VERSION = 12
+
+VALIDATION_SET_PATH = EVAL_DATA_PATH + "/valid/images/*.jpg"
+
+# map class names to class ids
+class_mappings = {
+    "Mug": 0,
+}
 
 
 def analyze_image_from_uri(
@@ -16,51 +32,85 @@ def analyze_image_from_uri(
     client = vision.ImageAnnotatorClient()
 
     image = vision.Image()
-    image.source.image_uri = image_uri
+
+    loaded_image = cv2.imread(image_uri)
+
+    base64_image = base64.b64encode(open(image_uri, "rb").read())
+
+    image.source.image_uri = "base64://" + base64_image.decode()
+
     features = [vision.Feature(type_=feature_type) for feature_type in feature_types]
-    request = vision.AnnotateImageRequest(image=image, features=features)
 
-    response = client.annotate_image(request=request)
+    request = {
+        "image": {"content": base64_image.decode()},
+        "features": features,
+    }
 
-    return response
+    response = client.annotate_image(request)
 
+    localized_object_annotations = response.localized_object_annotations
 
-def print_objects(response: vision.AnnotateImageResponse):
-    print("=" * 80)
-    for obj in response.localized_object_annotations:
-        nvertices = obj.bounding_poly.normalized_vertices
-        print(
-            f"{obj.score:4.0%}",
-            f"{obj.name:15}",
-            f"{obj.mid:10}",
-            ",".join(f"({v.x:.1f},{v.y:.1f})" for v in nvertices),
-            sep=" | ",
+    localized_object_annotations = [
+        annotation
+        for annotation in localized_object_annotations
+        if annotation.name in class_mappings.keys()
+    ]
+
+    if len(localized_object_annotations) == 0:
+        return sv.detection.core.Detections(
+            xyxy=np.array([[0, 0, 0, 0]]),
+            class_id=np.array([None]),
+            confidence=np.array([100]),
         )
-        
+
+    xyxys = []
+
+    image_size = loaded_image.shape
+
+    for obj in localized_object_annotations:
+        # scale up to full image size
+        x0 = obj.bounding_poly.normalized_vertices[0].x * image_size[1]
+        y0 = obj.bounding_poly.normalized_vertices[0].y * image_size[0]
+        x1 = obj.bounding_poly.normalized_vertices[2].x * image_size[1]
+        y1 = obj.bounding_poly.normalized_vertices[2].y * image_size[0]
+
+        xyxys.append([x0, y0, x1, y1])
+
+    annotations = sv.detection.core.Detections(
+        xyxy=np.array(xyxys).astype(np.float32),
+        class_id=np.array(
+            [class_mappings[obj.name] for obj in localized_object_annotations]
+        ),
+        confidence=np.array([obj.score for obj in localized_object_annotations]),
+    )
+
+    return annotations
+
 
 class_names, data, model = RoboflowDataLoader(
-    workspace_url="james-gallagher-87fuq",
-    project_url="mug-detector-eocwp",
-    project_version=12,
-    image_files="/Users/james/src/clip/model_eval/dataset-new",
+    workspace_url=ROBOFLOW_WORKSPACE_URL,
+    project_url=ROBOFLOW_PROJECT_URL,
+    project_version=ROBOFLOW_MODEL_VERSION,
+    image_files=EVAL_DATA_PATH,
 ).download_dataset()
 
 all_predictions = {}
 
-for file in os.listdir("/Users/james/src/clip/model_eval/dataset-new/valid"):
+for file in glob.glob(
+    VALIDATION_SET_PATH
+):
     # add base dir
     current_dir = os.getcwd()
-    file = os.path.join(current_dir, file)
 
     response = analyze_image_from_uri(file, [vision.Feature.Type.OBJECT_LOCALIZATION])
-    # print_labels(response)
 
-    print(response)
-
-    all_predictions[file] = {"filename": file, "predictions": data}
+    all_predictions[file] = {"filename": file, "predictions": response}
 
 evaluator = RoboflowEvaluator(
-    ground_truth=data, predictions=all_predictions, class_names=class_names, mode="batch"
+    ground_truth=data,
+    predictions=all_predictions,
+    class_names=class_names,
+    mode="batch",
 )
 
 cf = evaluator.eval_model_predictions()

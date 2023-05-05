@@ -9,17 +9,24 @@ from evaluations.dataloaders import RoboflowDataLoader
 from evaluations.dataloaders.classification import (
     ClassificationDetections, ClassificationFolderDataLoader)
 
+# use absolute path
+EVAL_DATA_PATH = ""
+ROBOFLOW_WORKSPACE_URL = ""
+ROBOFLOW_PROJECT_URL = ""
+ROBOFLOW_MODEL_VERSION = 1
+
+# use validation set
+IMAGE_PATH = EVAL_DATA_PATH + "/valid"
+
 class_names, ground_truth, model = RoboflowDataLoader(
-    workspace_url="mit-3xwsm",
-    project_url="appling",
-    project_version=1,
-    image_files="/Users/james/src/model_eval/dataset-new-apples",
+    workspace_url=ROBOFLOW_WORKSPACE_URL,
+    project_url=ROBOFLOW_PROJECT_URL,
+    project_version=ROBOFLOW_MODEL_VERSION,
+    image_files=EVAL_DATA_PATH,
     model_type="classification",
 ).download_dataset()
 
 all_predictions = {}
-
-IMAGE_PATH = "dataset-new-apples/valid"
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 clip_model, preprocess = clip.load("ViT-B/32", device=device)

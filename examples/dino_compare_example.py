@@ -3,30 +3,34 @@ import os
 import cv2
 from groundingdino.util.inference import Model
 
-from evaluations import Evaluator, CompareEvaluations
+from evaluations import CompareEvaluations, Evaluator
+from evaluations.confusion_matrices import plot_confusion_matrix
 from evaluations.dataloaders import RoboflowDataLoader
 
-from evaluations.confusion_matrices import plot_confusion_matrix
+# use absolute path
+ROBOFLOW_WORKSPACE_URL = "james-gallagher-87fuq"
+ROBOFLOW_PROJECT_URL = "mug-detector-eocwp"
+EVAL_DATA_PATH = "/Users/james/src/clip/model_eval/dataset-new"
+ROBOFLOW_MODEL_VERSION = 12
 
-DIRECTORY = "/Users/james/src/clip/model_eval/dataset-new"
-
-class_names, ground_truth, model = RoboflowDataLoader(
-    workspace_url="james-gallagher-87fuq",
-    project_url="mug-detector-eocwp",
-    project_version=12,
-    image_files=DIRECTORY,
-).download_dataset()
-
-IMAGE_PATH = DIRECTORY + "/valid/images"
+IMAGE_PATH = EVAL_DATA_PATH + "/valid/images"
 
 CONFIG_PATH: str = "GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py"
 WEIGHTS_PATH: str = "GroundingDINO/weights/groundingdino_swint_ogc.pth"
 BOX_THRESHOLD = 0.35
 TEXT_THRESHOLD = 0.25
 
+class_names, ground_truth, model = RoboflowDataLoader(
+    workspace_url=ROBOFLOW_WORKSPACE_URL,
+    project_url=ROBOFLOW_PROJECT_URL,
+    project_version=ROBOFLOW_MODEL_VERSION,
+    image_files=EVAL_DATA_PATH,
+).download_dataset()
+
 model = Model(
     model_config_path=CONFIG_PATH, model_checkpoint_path=WEIGHTS_PATH, device="cpu"
 )
+
 
 def get_dino_predictions(class_names):
     all_predictions = {}
@@ -43,13 +47,16 @@ def get_dino_predictions(class_names):
                 text_threshold=TEXT_THRESHOLD,
             )
 
-            all_predictions[file] = {"filename": file, "predictions": detections}#normalize_dino(image, detections)}
+            all_predictions[file] = {"filename": file, "predictions": detections}
 
     return all_predictions
 
+
 evals = [
     {"classes": ["banana", "background"], "confidence": 0.5},
-    {"classes": ["coffee cup", "background"], "confidence": 1.2},
+    {"classes": ["coffee cup", "background"], "confidence": 0.7},
+    {"classes": ["coffee cup", "background"], "confidence": 0.9},
+    {"classes": ["blue coffee cup", "background"], "confidence": 0.9},
 ]
 
 best = CompareEvaluations(

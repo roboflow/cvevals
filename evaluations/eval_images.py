@@ -49,10 +49,11 @@ def draw_bounding_boxes(
 
     # Draw ground truth bounding boxes with green color
     for x0, y0, x1, y1, label in ground_truth:
-        x0 = int(x0 * image.shape[1])
-        y0 = int(y0 * image.shape[0])
-        x1 = int(x1 * image.shape[1])
-        y1 = int(y1 * image.shape[0])
+        # x0 = int(x0 * image.shape[1])
+        # y0 = int(y0 * image.shape[0])
+        # x1 = int(x1 * image.shape[1])
+        # y1 = int(y1 * image.shape[0])
+        print(x0, y0, x1, y1, "gt")
         cv2.rectangle(output_image, (x0, y0), (x1, y1), (0, 255, 0), 2)
         cv2.putText(
             output_image,
@@ -64,18 +65,18 @@ def draw_bounding_boxes(
             2,
         )
 
+    print(ground_truth, predictions.xyxy)
+
     # Draw predicted bounding boxes with red color
-    for x0, y0, x1, y1, label, _ in predictions:
+    for pred in range(len(predictions.xyxy)):
+        prediction = predictions.xyxy[pred].tolist()
+        x0, y0, x1, y1 = prediction
+        class_name = class_names[int(predictions.class_id[pred])]
         # scale to image
-        x0 = int(x0 * image.shape[1])
-        y0 = int(y0 * image.shape[0])
-        x1 = int(x1 * image.shape[1])
-        y1 = int(y1 * image.shape[0])
         cv2.rectangle(output_image, (x0, y0), (x1, y1), (0, 0, 255), 2)
-        label = class_names[label]
         cv2.putText(
             output_image,
-            str(label),
+            str(class_name),
             (x0, y0 - 5),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.5,
@@ -112,5 +113,7 @@ def visualize_image_experiment(img_eval_data: dict, class_names: list) -> None:
     base_file_name = img_filename.split("/")[-1]
 
     # save to ./output/images
+
+    print(f"Saving image to ./output/images/{base_file_name}")
 
     cv2.imwrite(f"./output/images/{base_file_name}", output_image)

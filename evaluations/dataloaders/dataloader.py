@@ -1,7 +1,4 @@
-import glob
 import os
-
-N = 10
 
 
 class DataLoader:

@@ -97,10 +97,9 @@ class Evaluator:
 
             confusion_matrices[key] = cf
 
-            if self.mode == "interactive":
-                visualize_image_experiment(value, self.class_names)
+            visualize_image_experiment(value, self.class_names)
 
-                plot_confusion_matrix(cf, self.class_names, False, key, self.mode)
+            plot_confusion_matrix(cf, self.class_names, False, key, self.mode)
 
         plot_confusion_matrix(
             combined_cf, self.class_names, True, "aggregate", self.mode
@@ -108,13 +107,15 @@ class Evaluator:
 
         self.combined_cf = combined_cf
 
+        print("done evaluating model predictions")
+        print(combined_cf)
+
         return combined_cf
 
     def compute_confusion_matrix(
         self,
         image_eval_data,
         class_names,
-        confidence_threshold=0.2,
     ) -> dict:
         # image eval data looks like:
         # {filename: "path/to/image.jpg", ground_truth: [{}, {}, {}, ...], predictions: [{},{},{},...]}
@@ -126,7 +127,10 @@ class Evaluator:
         all_predictions = []
 
         for i in range(len(predictions)):
-            if predictions.confidence[i] > confidence_threshold and predictions.class_id[i] is not None:
+            if (
+                predictions.confidence[i] > self.confidence_threshold
+                and predictions.class_id[i] is not None
+            ):
                 merged_prediction = predictions.xyxy[i].tolist() + [
                     predictions.class_id[i]
                 ]
@@ -185,7 +189,10 @@ class Evaluator:
                 else:  # misclassification
                     fp += cf[(x, y)]
 
-        precision = tp / (tp + fp)
+        if tp + fp == 0:
+            precision = 1
+        else:
+            precision = tp / (tp + fp)
 
         if tp + fn == 0:
             recall = 1
@@ -196,6 +203,8 @@ class Evaluator:
             f1 = 0
         else:
             f1 = 2 * (precision * recall) / (precision + recall)
+
+        print(tp, fp, fn, precision, recall, f1)
 
         return EvaluatorResponse(
             true_positives=tp,

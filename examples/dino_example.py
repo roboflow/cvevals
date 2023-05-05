@@ -6,19 +6,25 @@ from groundingdino.util.inference import Model
 from evaluations import Evaluator
 from evaluations.dataloaders import RoboflowDataLoader
 
-class_names, data, model = RoboflowDataLoader(
-    workspace_url="james-gallagher-87fuq",
-    project_url="mug-detector-eocwp",
-    project_version=12,
-    image_files="/Users/james/src/clip/model_eval/dataset-new",
-).download_dataset()
+# use absolute path
+EVAL_DATA_PATH = ""
+ROBOFLOW_WORKSPACE_URL = ""
+ROBOFLOW_PROJECT_URL = ""
+ROBOFLOW_MODEL_VERSION = 0
 
-IMAGE_PATH = "/Users/james/src/clip/model_eval/dataset-new/valid/images"
+IMAGE_PATH = EVAL_DATA_PATH + "/valid/images"
 
 CONFIG_PATH: str = "GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py"
 WEIGHTS_PATH: str = "GroundingDINO/weights/groundingdino_swint_ogc.pth"
 BOX_THRESHOLD = 0.35
 TEXT_THRESHOLD = 0.25
+
+class_names, data, _ = RoboflowDataLoader(
+    workspace_url=ROBOFLOW_WORKSPACE_URL,
+    project_url=ROBOFLOW_PROJECT_URL,
+    project_version=ROBOFLOW_MODEL_VERSION,
+    image_files=EVAL_DATA_PATH,
+).download_dataset()
 
 model = Model(
     model_config_path=CONFIG_PATH, model_checkpoint_path=WEIGHTS_PATH, device="cpu"

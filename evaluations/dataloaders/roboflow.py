@@ -1,6 +1,6 @@
 import os
-import cv2
 
+import cv2
 import numpy as np
 import roboflow
 import yaml
@@ -189,6 +189,12 @@ class RoboflowPredictionsDataLoader(DataLoader):
             y0 = cy - h / 2
             x1 = cx + w / 2
             y1 = cy + h / 2
+
+            # multiply by image dimensions to get pixel values
+            x0 = int(x0 * width)
+            y0 = int(y0 * height)
+            x1 = int(x1 * width)
+            y1 = int(y1 * height)
 
             predictions.append(
                 (

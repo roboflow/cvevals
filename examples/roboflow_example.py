@@ -1,17 +1,23 @@
-from evaluations.dataloaders import (RoboflowDataLoader, RoboflowPredictionsDataLoader)
+from evaluations.dataloaders import (RoboflowDataLoader,
+                                     RoboflowPredictionsDataLoader)
 from evaluations.roboflow import RoboflowEvaluator
 
+ROBOFLOW_WORKSPACE_URL = "james-gallagher-87fuq"
+ROBOFLOW_PROJECT_URL = "mug-detector-eocwp"
+EVAL_DATA_PATH = "/Users/james/src/clip/model_eval/dataset-new"
+ROBOFLOW_MODEL_VERSION = 12
+
 class_names, data, model = RoboflowDataLoader(
-    workspace_url="james-gallagher-87fuq",
-    project_url="mug-detector-eocwp",
-    project_version=12,
-    image_files="/Users/james/src/clip/model_eval/dataset-new",
+    workspace_url=ROBOFLOW_WORKSPACE_URL,
+    project_url=ROBOFLOW_PROJECT_URL,
+    project_version=ROBOFLOW_MODEL_VERSION,
+    image_files=EVAL_DATA_PATH
 ).download_dataset()
 
 predictions = RoboflowPredictionsDataLoader(
     model=model,
     model_type="object-detection",
-    image_files="/Users/james/src/clip/model_eval/dataset-new/",
+    image_files=EVAL_DATA_PATH,
     class_names=class_names,
 ).process_files()
 

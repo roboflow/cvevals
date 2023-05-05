@@ -33,12 +33,16 @@ def plot_confusion_matrix(
     if aggregate:
         plt.title("Confusion Matrix (Aggregated)")
 
-    sns.heatmap(
+    heatmap = sns.heatmap(
         confusion,
         annot=True,
         xticklabels=class_names,
         yticklabels=class_names,
     )
+
+    # axis names
+    heatmap.set_xlabel("Predicted")
+    heatmap.set_ylabel("Actual")
 
     if mode == "interactive":
         plt.title(file_name)
