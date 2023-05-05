@@ -51,7 +51,7 @@ An `output/` folder will be created with two subfolders:
 
 Here is an example confusion matrix from the `output/matrices` folder:
 
-![Confusion matrix](aggregate.png)
+![Confusion matrix](example.png)
 
 ## Notes on Using CLIP and Grounding DINO
 
