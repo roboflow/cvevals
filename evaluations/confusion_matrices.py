@@ -38,6 +38,7 @@ def plot_confusion_matrix(
         annot=True,
         xticklabels=class_names,
         yticklabels=class_names,
+        fmt='g'
     )
 
     # axis names

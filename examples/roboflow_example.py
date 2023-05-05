@@ -3,9 +3,9 @@ from evaluations.dataloaders import (RoboflowDataLoader,
 from evaluations.roboflow import RoboflowEvaluator
 
 ROBOFLOW_WORKSPACE_URL = "james-gallagher-87fuq"
-ROBOFLOW_PROJECT_URL = "mug-detector-eocwp"
-EVAL_DATA_PATH = "/Users/james/src/clip/model_eval/dataset-new"
-ROBOFLOW_MODEL_VERSION = 12
+ROBOFLOW_PROJECT_URL = "retail-shelf-detection"
+EVAL_DATA_PATH = "/Users/james/src/clip/model_eval/dataset-retail"
+ROBOFLOW_MODEL_VERSION = 1
 
 class_names, data, model = RoboflowDataLoader(
     workspace_url=ROBOFLOW_WORKSPACE_URL,
@@ -26,6 +26,8 @@ evaluator = RoboflowEvaluator(
 )
 
 cf = evaluator.eval_model_predictions()
+
+print(cf)
 
 data = evaluator.calculate_statistics()
 

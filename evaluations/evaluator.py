@@ -107,9 +107,6 @@ class Evaluator:
 
         self.combined_cf = combined_cf
 
-        print("done evaluating model predictions")
-        print(combined_cf)
-
         return combined_cf
 
     def compute_confusion_matrix(
@@ -203,8 +200,6 @@ class Evaluator:
             f1 = 0
         else:
             f1 = 2 * (precision * recall) / (precision + recall)
-
-        print(tp, fp, fn, precision, recall, f1)
 
         return EvaluatorResponse(
             true_positives=tp,

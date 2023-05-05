@@ -49,11 +49,6 @@ def draw_bounding_boxes(
 
     # Draw ground truth bounding boxes with green color
     for x0, y0, x1, y1, label in ground_truth:
-        # x0 = int(x0 * image.shape[1])
-        # y0 = int(y0 * image.shape[0])
-        # x1 = int(x1 * image.shape[1])
-        # y1 = int(y1 * image.shape[0])
-        print(x0, y0, x1, y1, "gt")
         cv2.rectangle(output_image, (x0, y0), (x1, y1), (0, 255, 0), 2)
         cv2.putText(
             output_image,
@@ -64,8 +59,6 @@ def draw_bounding_boxes(
             (0, 255, 255),
             2,
         )
-
-    print(ground_truth, predictions.xyxy)
 
     # Draw predicted bounding boxes with red color
     for pred in range(len(predictions.xyxy)):

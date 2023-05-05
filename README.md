@@ -38,14 +38,16 @@ cd evaluations
 pip install -r requirements.txt
 ```
 
-Next, you'll need to create an evaluator. Check out the `*_examples.py` files for examples on evaluators. For instance, if you want to evaluate a Roboflow model, open `roboflow_example.py` and paste in your model ID, version number, and workspace ID. Then, run the script to see the results of the evaluation.
+Next, you'll need to create an evaluator. Check out the `*_examples.py` files for examples on evaluators. For instance, if you want to evaluate a Roboflow model, open `roboflow_example.py` and paste in your model ID, version number, and workspace ID in the constants at the top of the file. Then, run the script to see the results of the evaluation.
 
 ## Evaluation Results
 
-The script will print the following pieces of information to the console:
+The script will print the precision, accuracy, and f1 score of the model performance to the console.
 
-- An aggregate confusion matrix showing performance of the model on the dataset
-- The precision, accuracy, and f1 score of the model performance
+An `output/` folder will be created with two subfolders:
+
+1. `images`: Images with ground truth and predictions.
+2. `matrices`: Confusion matrices for each class. `aggregate.png` shows an aggregate confusion matrix for the model.
 
 ## Notes on Using CLIP and Grounding DINO
 
