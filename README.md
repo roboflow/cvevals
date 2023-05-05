@@ -49,6 +49,10 @@ An `output/` folder will be created with two subfolders:
 1. `images`: Images with ground truth and predictions.
 2. `matrices`: Confusion matrices for each class. `aggregate.png` shows an aggregate confusion matrix for the model.
 
+Here is an example confusion matrix from the `output/matrices` folder:
+
+![Confusion matrix](aggregate.png)
+
 ## Notes on Using CLIP and Grounding DINO
 
 ### CLIP
