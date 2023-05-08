@@ -87,19 +87,7 @@ python3 examples/blip_albef_example.py --eval_data_path=<path_to_eval_data> \
 
 To evaluate your data using BLIP, pass the `--feature-extractor=blip` argument. To evaluate your data using ALBEF, pass the `--feature-extractor=albef` argument.
 
-### Prompt Evaluation
-
-You can compare different prompts for CLIP and Grounding DINO using the `compare` examples.
-
-To use these examples, open up the appropriate file (i.e. `examples/clip_example.py`) and update the `evals` dictionary with the class names and confidence levels you want to evaluate.
-
-Then, run the script using all of the required arguments. To find the arguments for a script, run the script with no arguments, like so:
-
-```
-python3 examples/dino_compare_example.py
-```
-
-### Grounding DINO Prompt Evaluation
+### Grounding DINO Zero-Shot Evaluation
 
 You can use Grounding DINO to test whether Grounding DINO can effectively label a specified class in your Roboflow dataset.
 
@@ -112,6 +100,18 @@ python3 examples/dino_example.py --eval_data_path=<path_to_eval_data> \
 --roboflow_model_version=<model_version> \
 --config_path=<path_to_dino_config_file> \
 --weights_path=<path_to_dino_weights_file>
+```
+
+### Prompt Evaluation
+
+You can compare different prompts for CLIP and Grounding DINO using the `compare` examples.
+
+To use these examples, open up the appropriate file (i.e. `examples/clip_example.py`) and update the `evals` dictionary with the class names and confidence levels you want to evaluate.
+
+Then, run the script using all of the required arguments. To find the arguments for a script, run the script with no arguments, like so:
+
+```
+python3 examples/dino_compare_example.py
 ```
 
 ### Azure Evaluation
