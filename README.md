@@ -159,13 +159,13 @@ Here is an example confusion matrix from the `output/matrices` folder:
 
 Here is an example of an image with ground truth and predictions from the `output/images` folder:
 
-![Image of two cola bottles with ground truth and predictions](images/annotated_example.png)
+![Image of two cola bottles with ground truth and predictions](images/annotated_example.jpg)
 
 ### Prompt Comparison
 
 When you compare two prompts and/or confidence levels using the `CompareEvaluations.compare()` function, the results will be printed to the console, like so:
 
-![Console output of prompt comparison](images/prompt_comparison.png)
+![Console output of prompt comparison](images/prompt_comparison_table.png)
 
 ## Notes on Using CLIP, BLIP, ALBEF, and Grounding DINO
 
