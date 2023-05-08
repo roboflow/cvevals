@@ -7,7 +7,19 @@ from PIL import Image
 from evaluations.dataloaders.classification import ClassificationDetections
 
 
-def run_clip_inference(file, class_names):
+def run_clip_inference(file: str, class_names: list) -> dict:
+    """
+    Run inference on a single image using the CLIP model by OpenAI.
+
+    Args:
+
+        file (str): Path to the image file.
+        class_names (list): List of class names.
+
+    Returns:
+
+        dict: Dictionary containing the filename and the predictions.
+    """
     device = "cuda" if torch.cuda.is_available() else "cpu"
     clip_model, preprocess = clip.load("ViT-B/32", device=device)
 
