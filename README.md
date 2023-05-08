@@ -1,4 +1,4 @@
-![CV Evaluations banner](model-eval-banner.png)
+![CV Evaluations banner](images/model-eval-banner.png)
 
 # CV Evaluations 🔎
 
@@ -150,12 +150,22 @@ The script will print the precision, accuracy, and f1 score of the model perform
 
 An `output/` folder will be created with two subfolders:
 
-1. `images`: Images with ground truth and predictions.
+1. `images`: Images with ground truth and predictions (only for object detection models)
 2. `matrices`: Confusion matrices for each class. `aggregate.png` shows an aggregate confusion matrix for the model.
 
 Here is an example confusion matrix from the `output/matrices` folder:
 
-![Confusion matrix](example.png)
+![Confusion matrix](images/example.png)
+
+Here is an example of an image with ground truth and predictions from the `output/images` folder:
+
+![Image of two cola bottles with ground truth and predictions](images/annotated_example.png)
+
+### Prompt Comparison
+
+When you compare two prompts and/or confidence levels using the `CompareEvaluations.compare()` function, the results will be printed to the console, like so:
+
+![Console output of prompt comparison](images/prompt_comparison.png)
 
 ## Notes on Using CLIP, BLIP, ALBEF, and Grounding DINO
 
