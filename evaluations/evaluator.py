@@ -30,13 +30,20 @@ class Evaluator:
         class_names: list = [],
         confidence_threshold: int = 0.2,
         mode: str = "interactive",
+        name: str = "",
+        model_type: str = ""
     ) -> None:
         if mode not in ACCEPTED_MODES:
             raise ValueError(f"mode must be one of {ACCEPTED_MODES}")
+        
+        if model_type not in ["multiclass", "classification", "object-detection"]:
+            raise ValueError(f"model_type must be one of ['multiclass', 'classification', 'object-detection']")
 
         self.confidence_threshold = confidence_threshold
         self.mode = mode
         self.class_names = class_names
+        self.name = name
+        self.model_type = model_type
 
         if not os.path.exists("./output/images"):
             os.makedirs("./output/images")
@@ -97,7 +104,8 @@ class Evaluator:
 
             confusion_matrices[key] = cf
 
-            visualize_image_experiment(value, self.class_names)
+            if self.model_type == "object-detection":
+                visualize_image_experiment(value, self.class_names)
 
             plot_confusion_matrix(cf, self.class_names, False, key, self.mode)
 

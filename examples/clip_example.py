@@ -1,3 +1,4 @@
+import argparse
 import os
 
 import clip
@@ -6,14 +7,33 @@ from PIL import Image
 
 from evaluations.classification import ClassificationEvaluator
 from evaluations.dataloaders import RoboflowDataLoader
-from evaluations.dataloaders.classification import (
-    ClassificationDetections, ClassificationFolderDataLoader)
+from evaluations.dataloaders.classification import ClassificationDetections
 
-# use absolute path
-EVAL_DATA_PATH = ""
-ROBOFLOW_WORKSPACE_URL = ""
-ROBOFLOW_PROJECT_URL = ""
-ROBOFLOW_MODEL_VERSION = 1
+# translate above to argparse
+parser = argparse.ArgumentParser()
+
+parser.add_argument(
+    "--eval_data_path",
+    type=str,
+    required=True,
+    help="Absolute path to YOLOv5 PyTorch TXT or Classification dataset",
+)
+parser.add_argument(
+    "--roboflow_workspace_url", type=str, required=True, help="Roboflow workspace ID"
+)
+parser.add_argument(
+    "--roboflow_project_url", type=str, required=True, help="Roboflow project ID"
+)
+parser.add_argument(
+    "--roboflow_model_version", type=int, required=True, help="Roboflow model version"
+)
+
+args = parser.parse_args()
+
+EVAL_DATA_PATH = args.eval_data_path
+ROBOFLOW_WORKSPACE_URL = args.roboflow_workspace_url
+ROBOFLOW_PROJECT_URL = args.roboflow_project_url
+ROBOFLOW_MODEL_VERSION = args.roboflow_model_version
 
 # use validation set
 IMAGE_PATH = EVAL_DATA_PATH + "/valid"
@@ -23,7 +43,7 @@ class_names, ground_truth, model = RoboflowDataLoader(
     project_url=ROBOFLOW_PROJECT_URL,
     project_version=ROBOFLOW_MODEL_VERSION,
     image_files=EVAL_DATA_PATH,
-    model_type="classification",
+    model_type="multiclass",
 ).download_dataset()
 
 all_predictions = {}
@@ -31,7 +51,7 @@ all_predictions = {}
 device = "cuda" if torch.cuda.is_available() else "cpu"
 clip_model, preprocess = clip.load("ViT-B/32", device=device)
 
-for file in ClassificationFolderDataLoader(IMAGE_PATH).get_files()[1]:
+for file in ground_truth.keys():
     # add base dir
     current_dir = os.getcwd()
     file = os.path.join(current_dir, file)
@@ -61,8 +81,9 @@ for file in ClassificationFolderDataLoader(IMAGE_PATH).get_files()[1]:
 evaluator = ClassificationEvaluator(
     ground_truth=ground_truth,
     predictions=all_predictions,
-    class_names=["banana", "apple"],
+    class_names=class_names,
     mode="batch",
+    model_type="multiclass",
 )
 
 cf = evaluator.eval_model_predictions()

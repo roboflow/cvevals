@@ -2,6 +2,7 @@ import os
 
 import cv2
 import numpy as np
+import csv
 import roboflow
 import yaml
 from supervision.detection.core import Detections
@@ -95,6 +96,8 @@ class RoboflowDataLoader(DataLoader):
 
         if self.model_type == "classification":
             data_format = "folder"
+        elif self.model_type == "multiclass":
+            data_format = "multiclass"
         elif self.model_type == "object-detection":
             data_format = "yolov5"
         else:
@@ -116,6 +119,26 @@ class RoboflowDataLoader(DataLoader):
                     self.class_names = [
                         i.replace("-", " ") for i in dataset_yaml["names"]
                     ]
+        elif data_format == "multiclass":
+            with open(os.path.join(root_path, "valid/", "_classes.csv")) as f:
+                reader = csv.reader(f)
+                results = list(reader)
+
+                class_names = results[0]
+
+                # first item will be "filename", so we need to remove it
+                self.class_names = [c.strip() for c in class_names][1:]
+
+                self.class_names.append("background")
+
+                for row in results[1:]:
+                    self.data[os.path.join(root_path, "valid/", row[0])] = {
+                        "filename": os.path.join(root_path, "valid/", row[0]),
+                        "predictions": [],
+                        "ground_truth": [self.class_names[c - 1].strip() for c in range(1, len(row)) if row[c].strip() == "1"],
+                    }
+
+                return self.class_names, self.data, self.model
         else:
             # class names are folder names in test/
             self.class_names = [

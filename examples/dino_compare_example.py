@@ -1,3 +1,4 @@
+import argparse
 import os
 
 import cv2
@@ -7,18 +8,52 @@ from evaluations import CompareEvaluations, Evaluator
 from evaluations.confusion_matrices import plot_confusion_matrix
 from evaluations.dataloaders import RoboflowDataLoader
 
-# use absolute path
-ROBOFLOW_WORKSPACE_URL = "james-gallagher-87fuq"
-ROBOFLOW_PROJECT_URL = "mug-detector-eocwp"
-EVAL_DATA_PATH = "/Users/james/src/clip/model_eval/dataset-new"
-ROBOFLOW_MODEL_VERSION = 12
+# translate above to argparse
+parser = argparse.ArgumentParser()
 
+parser.add_argument(
+    "--eval_data_path",
+    type=str,
+    required=True,
+    help="Absolute path to YOLOv5 PyTorch TXT or Classification dataset",
+)
+parser.add_argument(
+    "--roboflow_workspace_url", type=str, required=True, help="Roboflow workspace ID"
+)
+parser.add_argument(
+    "--roboflow_project_url", type=str, required=True, help="Roboflow project ID"
+)
+parser.add_argument(
+    "--roboflow_model_version", type=int, required=True, help="Roboflow model version"
+)
+parser.add_argument(
+    "--config_path", type=str, required=True, help="Path to GroundingDINO config"
+)
+parser.add_argument(
+    "--weights_path", type=str, required=True, help="Path to GroundingDINO weights"
+)
+parser.add_argument("--box_threshold", type=float, required=False, help="Box threshold")
+parser.add_argument(
+    "--text_threshold", type=float, required=False, help="Text threshold"
+)
+
+args = parser.parse_args()
+
+if not args.box_threshold:
+    BOX_THRESHOLD = 0.35
+
+if not args.text_threshold:
+    TEXT_THRESHOLD = 0.25
+
+EVAL_DATA_PATH = args.eval_data_path
+ROBOFLOW_WORKSPACE_URL = args.roboflow_workspace_url
+ROBOFLOW_PROJECT_URL = args.roboflow_project_url
+ROBOFLOW_MODEL_VERSION = args.roboflow_model_version
+CONFIG_PATH = args.config_path
+WEIGHTS_PATH = args.weights_path
+
+# use validation set
 IMAGE_PATH = EVAL_DATA_PATH + "/valid/images"
-
-CONFIG_PATH: str = "GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py"
-WEIGHTS_PATH: str = "GroundingDINO/weights/groundingdino_swint_ogc.pth"
-BOX_THRESHOLD = 0.35
-TEXT_THRESHOLD = 0.25
 
 class_names, ground_truth, model = RoboflowDataLoader(
     workspace_url=ROBOFLOW_WORKSPACE_URL,

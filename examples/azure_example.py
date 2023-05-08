@@ -1,3 +1,4 @@
+import argparse
 import glob
 import os
 
@@ -9,16 +10,38 @@ import supervision as sv
 from evaluations.dataloaders import RoboflowDataLoader
 from evaluations.roboflow import RoboflowEvaluator
 
-# use absolute path
-EVAL_DATA_PATH = ""
-ROBOFLOW_WORKSPACE_URL = ""
-ROBOFLOW_PROJECT_URL = ""
-ROBOFLOW_MODEL_VERSION = 1
+# translate above to argparse
+parser = argparse.ArgumentParser()
+
+parser.add_argument(
+    "--eval_data_path",
+    type=str,
+    required=True,
+    help="Absolute path to YOLOv5 PyTorch TXT or Classification dataset",
+)
+parser.add_argument(
+    "--roboflow_workspace_url", type=str, required=True, help="Roboflow workspace ID"
+)
+parser.add_argument(
+    "--roboflow_project_url", type=str, required=True, help="Roboflow project ID"
+)
+parser.add_argument(
+    "--roboflow_model_version", type=int, required=True, help="Roboflow model version"
+)
+parser.add_argument("--azure_endpoint", type=str, required=True, help="Azure endpoint")
+parser.add_argument("--azure_api_key", type=str, required=True, help="Azure API key")
+
+args = parser.parse_args()
+
+EVAL_DATA_PATH = args.eval_data_path
+ROBOFLOW_WORKSPACE_URL = args.roboflow_workspace_url
+ROBOFLOW_PROJECT_URL = args.roboflow_project_url
+ROBOFLOW_MODEL_VERSION = args.roboflow_model_version
+AZURE_ENDPOINT = args.azure_endpoint
+AZURE_API_KEY = args.azure_api_key
 
 VALIDATION_SET_PATH = EVAL_DATA_PATH + "/valid/images/*.jpg"
 
-AZURE_ENDPOINT = ""
-AZURE_API_KEY = ""
 
 # map class names to class ids
 class_mappings = {
@@ -48,7 +71,7 @@ def run_inference_azure(image_filename):
             class_id=np.array([None]),
             confidence=np.array([100]),
         )
-    
+
     predictions = predictions["objects"]
 
     # turn predictions into xyxys
@@ -78,9 +101,7 @@ def run_inference_azure(image_filename):
 
     annotations = sv.detection.core.Detections(
         xyxy=np.array(xyxys).astype(np.float32),
-        class_id=np.array(
-            [class_mappings[obj["object"]] for obj in predictions]
-        ),
+        class_id=np.array([class_mappings[obj["object"]] for obj in predictions]),
         confidence=np.array([obj["confidence"] for obj in predictions]),
     )
 

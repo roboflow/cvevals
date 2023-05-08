@@ -30,6 +30,7 @@ class CompareEvaluations:
                 evaluation.class_names,
                 cf,
                 evaluation.confidence_threshold,
+                evaluation.name,
             )
 
             if data.f1 > highest_f1:
@@ -47,6 +48,7 @@ class CompareEvaluations:
                     "Class Names",
                     "Confusion Matrix",
                     "Confidence",
+                    "Name"
                 ]
             ]
             + evaluations,

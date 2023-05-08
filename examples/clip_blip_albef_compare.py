@@ -1,6 +1,7 @@
 import argparse
-import os
 
+import torch
+from models.blip import run_blip_albef_inference
 from models.clip import run_clip_inference
 
 from evaluations.classification import ClassificationEvaluator
@@ -8,6 +9,8 @@ from evaluations.compare import CompareEvaluations
 from evaluations.dataloaders import RoboflowDataLoader
 from evaluations.dataloaders.classification import \
     ClassificationFolderDataLoader
+
+device = "cuda" if torch.cuda.is_available() else "cpu"
 
 # translate above to argparse
 parser = argparse.ArgumentParser()
@@ -35,7 +38,7 @@ ROBOFLOW_WORKSPACE_URL = args.roboflow_workspace_url
 ROBOFLOW_PROJECT_URL = args.roboflow_project_url
 ROBOFLOW_MODEL_VERSION = args.roboflow_model_version
 
-IMAGE_PATH = EVAL_DATA_PATH + "/images/valid"
+IMAGE_PATH = EVAL_DATA_PATH + "/valid"
 
 class_names, ground_truth, model = RoboflowDataLoader(
     workspace_url=ROBOFLOW_WORKSPACE_URL,
@@ -45,30 +48,48 @@ class_names, ground_truth, model = RoboflowDataLoader(
     model_type="classification",
 ).download_dataset()
 
+# dedupe class names
+
+class_names = list(set(class_names))
+
+all_clip_predictions = {}
+
+for file in ClassificationFolderDataLoader(IMAGE_PATH).get_files()[1]:
+    # print(file)
+    all_clip_predictions.update(run_clip_inference(file, class_names))
+
+all_blip_predictions = {}
+
+for file in ClassificationFolderDataLoader(IMAGE_PATH).get_files()[1]:
+    all_blip_predictions.update(
+        run_blip_albef_inference(file, class_names, "blip", device)
+    )
+
+all_albef_predictions = {}
+
+for file in ClassificationFolderDataLoader(IMAGE_PATH).get_files()[1]:
+    all_albef_predictions.update(
+        run_blip_albef_inference(file, class_names, "albef", device)
+    )
+
 evals = [
-    {"classes": ["orange", "background"], "confidence": 1},
-    {"classes": ["pear", "background"], "confidence": 0.9},
+    {"name": "clip", "predictions": all_clip_predictions},
+    {"name": "blip", "predictions": all_blip_predictions},
+    {"name": "albef", "predictions": all_albef_predictions},
 ]
 
-evaluations = []
-
-for cn in evals:
-    all_predictions = {}
-
-    for file in ClassificationFolderDataLoader(IMAGE_PATH).get_files():
-        all_predictions.update(run_clip_inference(file, class_names))
-
-        evaluations.append(
-            ClassificationEvaluator(
-                predictions=all_predictions,
-                ground_truth=ground_truth,
-                confidence_threshold=cn["confidence"],
-                class_names=class_names + cn["classes"],
-                mode="batch",
-            )
+best = CompareEvaluations(
+    [
+        ClassificationEvaluator(
+            predictions=cn["predictions"],
+            ground_truth=ground_truth,
+            class_names=class_names,
+            mode="batch",
+            name=cn["name"],
         )
-
-best = CompareEvaluations(evaluations)
+    ]
+    for cn in evals
+)
 
 cf = best.compare()
 

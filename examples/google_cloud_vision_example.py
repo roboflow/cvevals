@@ -1,3 +1,4 @@
+import argparse
 import base64
 import glob
 import os
@@ -11,11 +12,31 @@ from google.cloud import vision
 from evaluations.dataloaders import RoboflowDataLoader
 from evaluations.roboflow import RoboflowEvaluator
 
-# use absolute path
-EVAL_DATA_PATH = "/Users/james/src/cvevals/dataset-new"
-ROBOFLOW_WORKSPACE_URL = "james-gallagher-87fuq"
-ROBOFLOW_PROJECT_URL = "mug-detector-eocwp"
-ROBOFLOW_MODEL_VERSION = 12
+# translate above to argparse
+parser = argparse.ArgumentParser()
+
+parser.add_argument(
+    "--eval_data_path",
+    type=str,
+    required=True,
+    help="Absolute path to YOLOv5 PyTorch TXT or Classification dataset",
+)
+parser.add_argument(
+    "--roboflow_workspace_url", type=str, required=True, help="Roboflow workspace ID"
+)
+parser.add_argument(
+    "--roboflow_project_url", type=str, required=True, help="Roboflow project ID"
+)
+parser.add_argument(
+    "--roboflow_model_version", type=int, required=True, help="Roboflow model version"
+)
+
+args = parser.parse_args()
+
+EVAL_DATA_PATH = args.eval_data_path
+ROBOFLOW_WORKSPACE_URL = args.roboflow_workspace_url
+ROBOFLOW_PROJECT_URL = args.roboflow_project_url
+ROBOFLOW_MODEL_VERSION = args.roboflow_model_version
 
 VALIDATION_SET_PATH = EVAL_DATA_PATH + "/valid/images/*.jpg"
 
@@ -96,9 +117,7 @@ class_names, data, model = RoboflowDataLoader(
 
 all_predictions = {}
 
-for file in glob.glob(
-    VALIDATION_SET_PATH
-):
+for file in glob.glob(VALIDATION_SET_PATH):
     # add base dir
     current_dir = os.getcwd()
 
