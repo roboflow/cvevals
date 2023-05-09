@@ -19,13 +19,17 @@ Performance is measured using an aggregate of the following metrics:
 - **Recall**
 - **F1 Score**
 
-Evaluations works with YOLOv5 PyTorch TXT data for object detection and Multiclass Classification TXT for classification.
-
 This repository contains evaluation code for the following models:
 
 - Roboflow models
 - CLIP
 - Grounding DINO
+
+The following data formats are supported:
+
+- YOLOv5 PyTorch TXT (object detection)
+- Multiclass Classification TXT (classification)
+- Classification Folder (classification)
 
 ## Getting Started
 
