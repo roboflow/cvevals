@@ -1,11 +1,13 @@
 import argparse
 import os
+import numpy as np
 
 import cv2
 from groundingdino.util.inference import Model
 
+import supervision as sv
+
 from evaluations import CompareEvaluations, Evaluator
-from evaluations.confusion_matrices import plot_confusion_matrix
 from evaluations.dataloaders import RoboflowDataLoader
 
 # translate above to argparse
@@ -60,6 +62,7 @@ class_names, ground_truth, model = RoboflowDataLoader(
     project_url=ROBOFLOW_PROJECT_URL,
     project_version=ROBOFLOW_MODEL_VERSION,
     image_files=EVAL_DATA_PATH,
+    model_type="object-detection"
 ).download_dataset()
 
 model = Model(
@@ -67,10 +70,12 @@ model = Model(
 )
 
 
-def get_dino_predictions(class_names):
+def get_dino_predictions(class_names: dict) -> dict:
     all_predictions = {}
 
-    for file in os.listdir(IMAGE_PATH)[:2]:
+    class_names = [pred["inference"] for pred in class_names]
+
+    for file in os.listdir(IMAGE_PATH):
         file = os.path.join(IMAGE_PATH, file)
         if file.endswith(".jpg"):
             image = cv2.imread(file)
@@ -82,34 +87,56 @@ def get_dino_predictions(class_names):
                 text_threshold=TEXT_THRESHOLD,
             )
 
-            all_predictions[file] = {"filename": file, "predictions": detections}
+            annotations = sv.detection.core.Detections(
+                xyxy=np.array(detections.xyxy).astype(np.float32),
+                class_id=np.array(detections.class_id),
+                confidence=np.array(detections.confidence)
+            )
+
+            all_predictions[file] = {"filename": file, "predictions": annotations}
 
     return all_predictions
 
-
 evals = [
-    {"classes": ["banana", "background"], "confidence": 0.5},
-    {"classes": ["coffee cup", "background"], "confidence": 0.7},
-    {"classes": ["coffee cup", "background"], "confidence": 0.9},
-    {"classes": ["blue coffee cup", "background"], "confidence": 0.9},
+    {"classes": [{"ground_truth": "", "inference": ""}], "confidence": 0.5},
 ]
+
+# map eval inferences to ground truth
+for e in evals:
+    new_ground_truth = ground_truth.copy()
+
+    for key in new_ground_truth.keys():
+        result = list(new_ground_truth[key]["ground_truth"])
+
+        for idx, item in enumerate(result):
+            if item[4] == class_names.index(e["classes"][0]["ground_truth"]):
+                item = list(item)
+                item[4] = 0
+                result[idx] = tuple(item)
+
+        result = [item for item in result if item[4] == 0]
+
+        new_ground_truth[key]["ground_truth"] = result
+
+    evals[evals.index(e)]["ground_truth"] = new_ground_truth.copy()
+    evals[evals.index(e)]["inference_class_names"] = [e["classes"][0]["inference"], "background"]
 
 best = CompareEvaluations(
     [
         Evaluator(
             predictions=get_dino_predictions(class_names=cn["classes"]),
-            ground_truth=ground_truth,
+            ground_truth=cn["ground_truth"],
             confidence_threshold=cn["confidence"],
-            class_names=cn["classes"],
+            class_names=cn["inference_class_names"],
+            name=cn["classes"][0]["inference"],
             mode="batch",
+            model_type="object-detection"
         )
         for cn in evals
     ]
 )
 
 comparison = best.compare()
-
-plot_confusion_matrix(comparison[4], class_names=comparison[3], mode="interactive")
 
 print("F1 Score:", comparison[0])
 print("Precision:", comparison[1])
