@@ -37,7 +37,7 @@ To get started, clone the repository and install the required dependencies:
 
 ```bash
 
-git clone https://github.com/roboflow/evaluations.git
+git clone https://github.com/roboflow/cvevals.git
 cd evaluations
 pip install -r requirements.txt
 pip install -e .
