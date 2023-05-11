@@ -50,28 +50,49 @@ class RoboflowDataLoader(DataLoader):
                 # Split the line into a list of values and convert them to floats
                 values = list(map(float, line.strip().split()))
 
-                # Extract the label, and scale the coordinates and dimensions
-                label = int(values[0])
-                cx = values[1]
-                cy = values[2]
-                width = values[3]
-                height = values[4]
-
                 image = cv2.imread(img_filename)
 
-                x0 = cx - width / 2
-                y0 = cy - height / 2
-                x1 = cx + width / 2
-                y1 = cy + height / 2
+                # these are polygons with format: `label x0 y0 x1 y1 x2 y2 ...`
+                if len(values) > 4:
+                    label = int(values[0])
+                    coords = values[1:]
+                    x_coords = coords[::2]
+                    y_coords = coords[1::2]
 
-                # scale to non-floats
-                x0 = int(x0 * image.shape[1])
-                y0 = int(y0 * image.shape[0])
-                x1 = int(x1 * image.shape[1])
-                y1 = int(y1 * image.shape[0])
+                    x0 = min(x_coords)
+                    y0 = min(y_coords)
+                    x1 = max(x_coords)
+                    y1 = max(y_coords)
 
-                # Add the extracted data to the output list
-                labels.append((x0, y0, x1, y1, label))
+                    # scale to non-floats
+                    x0 = int(x0 * image.shape[1])
+                    y0 = int(y0 * image.shape[0])
+                    x1 = int(x1 * image.shape[1])
+                    y1 = int(y1 * image.shape[0])
+
+                    labels.append((x0, y0, x1, y1, label))
+
+                # plain bounding boxes with format: `label cx cy w h`
+                else:
+                    label = int(values[0])
+                    cx = values[1]
+                    cy = values[2]
+                    width = values[3]
+                    height = values[4]
+
+                    x0 = cx - width / 2
+                    y0 = cy - height / 2
+                    x1 = cx + width / 2
+                    y1 = cy + height / 2
+
+                    # scale to non-floats
+                    x0 = int(x0 * image.shape[1])
+                    y0 = int(y0 * image.shape[0])
+                    x1 = int(x1 * image.shape[1])
+                    y1 = int(y1 * image.shape[0])
+
+                    # Add the extracted data to the output list
+                    labels.append((x0, y0, x1, y1, label))
 
         return labels
 
