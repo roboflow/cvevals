@@ -19,12 +19,6 @@ Performance is measured using an aggregate of the following metrics:
 - **Recall**
 - **F1 Score**
 
-This repository contains evaluation code for the following models:
-
-- Roboflow models
-- CLIP
-- Grounding DINO
-
 The following data formats are supported:
 
 - YOLOv5 PyTorch TXT (object detection)
@@ -51,6 +45,8 @@ Out of the box, we have created examples that let you evaluate the performance o
 - BLIP (Classification)
 - ALBEF (Classification)
 - Grounding DINO (Object Detection)
+- BLIPv2 (Classification)
+- ImageBind (Classification)
 
 ## Examples
 
