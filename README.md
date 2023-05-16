@@ -2,7 +2,7 @@
 
 # CV Evaluations 🔎
 
-`cvevals` is a framework for evaluating the results of computer vision models. Think [OpenAI Evals](https://github.com/openai/evals), but for computer vision models.
+`cvevals` is a framework for evaluating the results of computer vision models. 
 
 Roboflow `evaluations` is a Python package for evaluating computer vision models.
 
