@@ -25,7 +25,7 @@ setuptools.setup(
     description="Evaluate ground truth and model predictions from Roboflow and supported zero-shot models",
     long_description=README,
     long_description_content_type="text/markdown",
-    url="https://github.com/roboflow/evaluations",
+    url="https://github.com/roboflow/cvevals",
     install_requires=["numpy>=1.20.0", "opencv-python", "matplotlib"],
     packages=find_packages(exclude=("tests",)),
     extras_require={

@@ -1,0 +1,73 @@
+site_name: CVevals
+site_url: https://roboflow.github.io/cvevals
+site_author: Roboflow
+site_description: A framework for evaluating the results of computer vision models.
+repo_name: roboflow/autodistill
+repo_url: https://github.com/roboflow/cvevals
+edit_uri: https://github.com/roboflow/cvevals/tree/main/docs
+copyright: Roboflow 2023. All rights reserved.
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/roboflow
+    - icon: fontawesome/brands/youtube
+      link: https://www.youtube.com/roboflow
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/company/roboflow-ai/mycompany/
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/roboflow
+
+extra_css:
+  - stylesheets/extra.css
+
+nav:
+  - Home: index.md
+  - Examples:
+    - CLIP: examples/clip.md
+    - Grounding DINO: examples/yolov5.md
+    - ImageBind: examples/imagebind.md
+    - Roboflow: examples/roboflow.md
+    - Compare DINO Prompts: examples/compare_dino_prompts.md
+    - See All: examples.md
+  - Scripts: scripts.md
+  - Data Loaders:
+    - Roboflow: data_loaders/roboflow.md
+  - Evaluators:
+    - Object Detection: evaluators/object_detection.md
+    - Classification: evaluators/classification.md
+  - Changelog: changelog.md
+
+theme:
+  name: 'material'
+  palette:
+    # Palette for light mode
+    - scheme: default
+      primary: 'custom'
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - scheme: slate
+      primary: 'custom'
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  font:
+    text: Roboto
+    code: Roboto Mono
+
+plugins:
+  - mkdocstrings
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - attr_list
+  - md_in_html
+  - pymdownx.tabbed:
+      alternate_style: true
+  - toc:
+      permalink: true
