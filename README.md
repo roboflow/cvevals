@@ -61,6 +61,18 @@ python3 examples/roboflow_example.py --eval_data_path <path_to_eval_data> \
 --roboflow_model_version <model_version>
 ```
 
+You can also compare different versions of Roboflow models.
+
+To do so, open the `examples/compare_roboflow_models.py` file and add the workspace URL, project URL, and versions for each model you want to compare. You should also set a confidence threshold for each model version that will be used to filter out low confidence predictions.
+
+Then, run the `compare_roboflow_models.py` script:
+
+```
+python3 examples/compare_roboflow_models.py
+```
+
+This script will generate a PDF called `roboflow_model_comparison.pdf` that shows the precision, recall, f1 score, and confusion matrix for each model.
+
 ### CLIP Evaluation
 
 You can run CLIP over images in your validation set to see how well the model performs at zero-shot annotation.
@@ -206,6 +218,12 @@ Note: This package will not install on M1 Macs.
 ### Grounding DINO
 
 To use GroundingDINO, run the `dinosetup.sh` script in the root `evaluations` directory. This will install the model relative to the `evaluations` directory and download the model weights.
+
+## Scripts
+
+This repository contains utilities for evaluating annotation quality. These are in the `scripts` folder:
+
+- `scripts/cutout.py`: Use CLIP to identify annotations that may be incorrectly labelled.
 
 ## License
 
