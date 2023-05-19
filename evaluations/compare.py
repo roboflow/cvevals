@@ -1,17 +1,21 @@
 from tabulate import tabulate
 
+SUPPORTED_COMPARATORS = ["f1", "precision", "recall"]
 
 class CompareEvaluations:
     """
     Compare multiple evaluations and return the best one.
     """
 
-    def __init__(self, evaluations):
+    def __init__(self, evaluations, comparator: str = "f1"):
         self.evaluations = evaluations
+        self.comparator = comparator
 
     def compare(self):
-        # find highest f1
-        highest_f1 = -1
+        """
+        Compare the evaluations and return the best one according to the specified comparator.
+        """
+        highest = -1
         highest_eval = None
 
         evaluations = []
@@ -33,9 +37,23 @@ class CompareEvaluations:
                 evaluation.name,
             )
 
-            if data.f1 > highest_f1:
-                highest_f1 = data.f1
-                highest_eval = results
+            if self.comparator not in SUPPORTED_COMPARATORS:
+                raise Exception(
+                    f"Comparator {self.comparator} not supported. Please use one of {SUPPORTED_COMPARATORS}."
+                )
+            
+            if self.comparator == "f1":
+                if data.f1 > highest:
+                    highest = data.f1
+                    highest_eval = results
+            elif self.comparator == "precision":
+                if data.precision > highest:
+                    highest = data.precision
+                    highest_eval = results
+            elif self.comparator == "recall":
+                if data.recall > highest:
+                    highest = data.recall
+                    highest_eval = results
 
             evaluations.append(results)
 
@@ -58,4 +76,4 @@ class CompareEvaluations:
 
         print(table)
 
-        return highest_eval
+        return highest_eval, evaluations

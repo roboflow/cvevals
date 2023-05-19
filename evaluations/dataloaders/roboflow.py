@@ -18,6 +18,7 @@ class RoboflowDataLoader(DataLoader):
         project_version: int,
         image_files: str,
         model_type: str = "object-detection",
+        dataset: str = "test",
     ):
         """
         Load a dataset from Roboflow. Saves the result to ./dataset/
@@ -37,6 +38,7 @@ class RoboflowDataLoader(DataLoader):
         self.model_type = model_type
         self.data = {}
         self.image_files = image_files
+        self.dataset = dataset
 
         self.model = None
         self.dataset_version = None
@@ -92,7 +94,7 @@ class RoboflowDataLoader(DataLoader):
         project = rf.workspace(self.workspace_url).project(self.project_url)
 
         self.dataset_version = project.version(self.project_version)
-        self.model = self.dataset_version.model
+        self.dataset_content = self.dataset_version
 
         if self.model_type == "classification":
             data_format = "folder"
@@ -103,7 +105,6 @@ class RoboflowDataLoader(DataLoader):
         else:
             raise ValueError("Model type not supported")
 
-        # TODO: Calculate correct path
         root_path = self.image_files
 
         # download if needed
@@ -147,7 +148,7 @@ class RoboflowDataLoader(DataLoader):
                 if os.path.isdir(os.path.join(root_path, "valid", name))
             ]
 
-        for root, dirs, files in os.walk(self.image_files.rstrip("/") + "/valid/"):
+        for root, dirs, files in os.walk(self.image_files.rstrip("/") + f"/{self.dataset}/"):
             for file in files:
                 if file.endswith(".jpg"):
                     if self.model_type == "object-detection":
@@ -229,6 +230,9 @@ class RoboflowPredictionsDataLoader(DataLoader):
             )
             class_names.append(self.class_names.index(p["class"]))
             confidence.append(p["confidence"])
+
+        if len(predictions) == 0:
+            return Detections.empty()
 
         predictions = Detections(
             xyxy=np.array(predictions),
