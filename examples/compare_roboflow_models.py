@@ -10,7 +10,13 @@ from evaluations.roboflow import RoboflowEvaluator
 
 MODEL_TYPE = "object-detection"
 
-models = []
+models = [
+    {
+        "workspace_url": "",
+        "project_url": "",
+        "model_version": 8,
+    },
+]
 
 evals = []
 datasets = []
