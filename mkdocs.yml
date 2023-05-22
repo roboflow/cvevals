@@ -2,7 +2,7 @@ site_name: CVevals
 site_url: https://roboflow.github.io/cvevals
 site_author: Roboflow
 site_description: A framework for evaluating the results of computer vision models.
-repo_name: roboflow/autodistill
+repo_name: roboflow/cvevals
 repo_url: https://github.com/roboflow/cvevals
 edit_uri: https://github.com/roboflow/cvevals/tree/main/docs
 copyright: Roboflow 2023. All rights reserved.
@@ -14,7 +14,7 @@ extra:
     - icon: fontawesome/brands/youtube
       link: https://www.youtube.com/roboflow
     - icon: fontawesome/brands/linkedin
-      link: https://www.linkedin.com/company/roboflow-ai/mycompany/
+      link: https://www.linkedin.com/company/roboflow-ai/
     - icon: fontawesome/brands/twitter
       link: https://twitter.com/roboflow
 
@@ -24,11 +24,14 @@ extra_css:
 nav:
   - Home: index.md
   - Examples:
+    - Azure: examples/azure.md
+    - BLIP, ALBEF: examples/blip.md
     - CLIP: examples/clip.md
-    - Grounding DINO: examples/yolov5.md
+    - Compare Prompts: examples/compare_prompts.md
+    - Grounding DINO: examples/groundingdino.md
     - ImageBind: examples/imagebind.md
     - Roboflow: examples/roboflow.md
-    - Compare DINO Prompts: examples/compare_dino_prompts.md
+    - Compare Annotations: examples/compare_annotations.md
     - See All: examples.md
   - Scripts: scripts.md
   - Data Loaders:
