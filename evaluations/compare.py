@@ -2,6 +2,7 @@ from tabulate import tabulate
 
 SUPPORTED_COMPARATORS = ["f1", "precision", "recall"]
 
+
 class CompareEvaluations:
     """
     Compare multiple evaluations and return the best one.
@@ -41,7 +42,7 @@ class CompareEvaluations:
                 raise Exception(
                     f"Comparator {self.comparator} not supported. Please use one of {SUPPORTED_COMPARATORS}."
                 )
-            
+
             if self.comparator == "f1":
                 if data.f1 > highest:
                     highest = data.f1
@@ -66,7 +67,7 @@ class CompareEvaluations:
                     "Class Names",
                     "Confusion Matrix",
                     "Confidence",
-                    "Name"
+                    "Name",
                 ]
             ]
             + evaluations,

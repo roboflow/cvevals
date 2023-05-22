@@ -1,13 +1,14 @@
+import csv
 import os
 
 import cv2
 import numpy as np
-import csv
 import roboflow
 import yaml
 from supervision.detection.core import Detections
 
 from .dataloader import DataLoader
+from .yolov5 import get_ground_truth_for_image
 
 
 class RoboflowDataLoader(DataLoader):
@@ -43,41 +44,6 @@ class RoboflowDataLoader(DataLoader):
         self.model = None
         self.dataset_version = None
 
-    def get_ground_truth_for_image(self, img_filename):
-        labels = []
-        label_file = img_filename.replace("/images/", "/labels/").replace(
-            ".jpg", ".txt"
-        )
-        with open(label_file, "r") as file:
-            for line in file:
-                # Split the line into a list of values and convert them to floats
-                values = list(map(float, line.strip().split()))
-
-                # Extract the label, and scale the coordinates and dimensions
-                label = int(values[0])
-                cx = values[1]
-                cy = values[2]
-                width = values[3]
-                height = values[4]
-
-                image = cv2.imread(img_filename)
-
-                x0 = cx - width / 2
-                y0 = cy - height / 2
-                x1 = cx + width / 2
-                y1 = cy + height / 2
-
-                # scale to non-floats
-                x0 = int(x0 * image.shape[1])
-                y0 = int(y0 * image.shape[0])
-                x1 = int(x1 * image.shape[1])
-                y1 = int(y1 * image.shape[0])
-
-                # Add the extracted data to the output list
-                labels.append((x0, y0, x1, y1, label))
-
-        return labels
-
     def download_dataset(self) -> None:
         """
         Download a dataset from Roboflow. Saves the result to ./dataset/
@@ -95,12 +61,15 @@ class RoboflowDataLoader(DataLoader):
 
         self.dataset_version = project.version(self.project_version)
         self.dataset_content = self.dataset_version
+        self.model = project.version(self.project_version).model
 
         if self.model_type == "classification":
             data_format = "folder"
         elif self.model_type == "multiclass":
             data_format = "multiclass"
         elif self.model_type == "object-detection":
+            data_format = "yolov5"
+        elif self.model_type == "segmentation":
             data_format = "yolov5"
         else:
             raise ValueError("Model type not supported")
@@ -136,7 +105,11 @@ class RoboflowDataLoader(DataLoader):
                     self.data[os.path.join(root_path, "valid/", row[0])] = {
                         "filename": os.path.join(root_path, "valid/", row[0]),
                         "predictions": [],
-                        "ground_truth": [self.class_names[c - 1].strip() for c in range(1, len(row)) if row[c].strip() == "1"],
+                        "ground_truth": [
+                            self.class_names[c - 1].strip()
+                            for c in range(1, len(row))
+                            if row[c].strip() == "1"
+                        ],
                     }
 
                 return self.class_names, self.data, self.model
@@ -148,13 +121,17 @@ class RoboflowDataLoader(DataLoader):
                 if os.path.isdir(os.path.join(root_path, "valid", name))
             ]
 
-        for root, dirs, files in os.walk(self.image_files.rstrip("/") + f"/{self.dataset}/"):
+        for root, dirs, files in os.walk(
+            self.image_files.rstrip("/") + f"/{self.dataset}/"
+        ):
             for file in files:
                 if file.endswith(".jpg"):
-                    if self.model_type == "object-detection":
-                        ground_truth = self.get_ground_truth_for_image(
+                    if self.model_type == "object-detection" or self.model_type == "segmentation":
+                        ground_truth, masks = get_ground_truth_for_image(
                             os.path.join(root, file)
                         )
+                        if masks != []:
+                            ground_truth = masks
                     else:
                         # folder name
                         ground_truth = [os.path.basename(root)]
@@ -201,6 +178,7 @@ class RoboflowPredictionsDataLoader(DataLoader):
         predictions = []
         class_names = []
         confidence = []
+        masks = []
 
         for p in prediction_group:
             # scale predictions to 0 to 1
@@ -220,6 +198,32 @@ class RoboflowPredictionsDataLoader(DataLoader):
             x1 = int(x1 * width)
             y1 = int(y1 * height)
 
+            if p.get("points"):
+                # points are {x, y} pairs, turn into mask
+                points = p["points"]
+
+                # print(points)
+
+                mask = np.zeros((int(height), int(width)), dtype=np.uint8)
+                points = np.array(
+                    [(p["x"], p["y"]) for p in points], dtype=np.int32
+                ).reshape((-1, 1, 2))
+
+                # entire points should be filled
+
+                cv2.fillPoly(mask, [points], 1)
+
+                # should be T or F
+                mask = mask.astype(bool)
+
+                # print # of True bools
+                print(np.count_nonzero(mask))
+                # cv2.imshow("mask", mask.astype(np.uint8) * 255)
+                # if cv2.waitKey(0) == ord("q"):
+                #     break
+
+                masks.append(mask)
+
             predictions.append(
                 (
                     x0,
@@ -237,6 +241,7 @@ class RoboflowPredictionsDataLoader(DataLoader):
         predictions = Detections(
             xyxy=np.array(predictions),
             class_id=np.array(class_names),
+            mask=np.array(masks),
             confidence=np.array(confidence),
         )
 

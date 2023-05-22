@@ -31,13 +31,15 @@ class Evaluator:
         confidence_threshold: int = 0.2,
         mode: str = "interactive",
         name: str = "",
-        model_type: str = ""
+        model_type: str = "",
     ) -> None:
         if mode not in ACCEPTED_MODES:
             raise ValueError(f"mode must be one of {ACCEPTED_MODES}")
-        
-        if model_type not in ["multiclass", "classification", "object-detection"]:
-            raise ValueError(f"model_type must be one of ['multiclass', 'classification', 'object-detection']")
+
+        if model_type not in ["multiclass", "classification", "object-detection", "segmentation"]:
+            raise ValueError(
+                f"model_type must be one of ['multiclass', 'classification', 'object-detection', 'segmentation']"
+            )
 
         self.confidence_threshold = confidence_threshold
         self.mode = mode

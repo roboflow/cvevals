@@ -34,11 +34,7 @@ def plot_confusion_matrix(
         plt.title("Confusion Matrix (Aggregated)")
 
     heatmap = sns.heatmap(
-        confusion,
-        annot=True,
-        xticklabels=class_names,
-        yticklabels=class_names,
-        fmt='g'
+        confusion, annot=True, xticklabels=class_names, yticklabels=class_names, fmt="g"
     )
 
     # axis names
