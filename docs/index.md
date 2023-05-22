@@ -21,9 +21,9 @@ Performance is measured using an aggregate of the following metrics:
 
 The following data formats are supported:
 
-- YOLOv5 PyTorch TXT (object detection)
-- Multiclass Classification TXT (classification)
-- Classification Folder (classification)
+- YOLOv5 PyTorch TXT (object detection, segmentation)
+- Multiclass Classification TXT (multi-class classification)
+- Classification Folder (single-class classification)
 
 ## Results
 

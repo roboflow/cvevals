@@ -11,3 +11,4 @@ These examples are:
 - [Evaluate ImageBind model performance](/examples/imagebind/)
 - [Evaluate Roboflow model performance](/examples/roboflow/)
 - [Compare prompts](/examples/compare-prompts/)
+- [Compare two dataset annotations](/examples/compare-annotations/)
