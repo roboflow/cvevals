@@ -10,9 +10,9 @@ To use the script, run the following code:
 
 ```
 python3 examples/dinov2_example.py \
-    --eval_data_path=./images/
-    --roboflow_workspace_url=<>
-    --roboflow_project_url=<>
+    --eval_data_path=./images/ \
+    --roboflow_workspace_url=<> \
+    --roboflow_project_url=<> \
     --roboflow_model_version=<>
 ```
 
