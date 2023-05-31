@@ -12,7 +12,6 @@ from google.cloud import vision
 from evaluations.dataloaders import RoboflowDataLoader
 from evaluations.roboflow import RoboflowEvaluator
 
-# translate above to argparse
 parser = argparse.ArgumentParser()
 
 parser.add_argument(

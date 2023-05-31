@@ -20,7 +20,6 @@ model = imagebind_model.imagebind_huge(pretrained=True)
 model.eval()
 model.to(device)
 
-# translate above to argparse
 parser = argparse.ArgumentParser()
 
 parser.add_argument(

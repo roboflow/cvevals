@@ -7,7 +7,6 @@ from groundingdino.util.inference import Model
 from evaluations import Evaluator
 from evaluations.dataloaders import RoboflowDataLoader
 
-# translate above to argparse
 parser = argparse.ArgumentParser()
 
 parser.add_argument(

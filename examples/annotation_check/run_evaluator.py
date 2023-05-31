@@ -9,7 +9,6 @@ dataset = project.version().download("voc")
 '''
 
 
-# translate above to argparse
 parser = argparse.ArgumentParser()
 
 parser.add_argument(

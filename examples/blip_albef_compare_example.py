@@ -10,7 +10,6 @@ from evaluations.dataloaders.classification import \
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-# translate above to argparse
 parser = argparse.ArgumentParser()
 
 parser.add_argument(

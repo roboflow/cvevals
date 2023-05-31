@@ -10,7 +10,6 @@ import supervision as sv
 from evaluations import CompareEvaluations, Evaluator
 from evaluations.dataloaders import RoboflowDataLoader
 
-# translate above to argparse
 parser = argparse.ArgumentParser()
 
 parser.add_argument(

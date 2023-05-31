@@ -9,7 +9,6 @@ from evaluations.dataloaders import RoboflowDataLoader
 from evaluations.dataloaders.classification import \
     ClassificationFolderDataLoader
 
-# translate above to argparse
 parser = argparse.ArgumentParser()
 
 parser.add_argument(

@@ -6,7 +6,6 @@ from evaluations.dataloaders import (RoboflowDataLoader,
                                      RoboflowPredictionsDataLoader)
 from evaluations.segmentation import SegmentationEvaluator
 
-# translate above to argparse
 parser = argparse.ArgumentParser()
 
 parser.add_argument(

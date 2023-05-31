@@ -5,7 +5,6 @@ from evaluations.dataloaders import (RoboflowDataLoader,
                                      RoboflowPredictionsDataLoader)
 from evaluations.roboflow import RoboflowEvaluator
 
-# translate above to argparse
 parser = argparse.ArgumentParser()
 
 parser.add_argument(
