@@ -27,6 +27,7 @@ nav:
     - Azure: examples/azure.md
     - BLIP, ALBEF: examples/blip.md
     - CLIP: examples/clip.md
+    - Compare CLIP and DINOv2: examples/compare_clip_dinov2.md
     - Compare Prompts: examples/compare_prompts.md
     - Grounding DINO: examples/groundingdino.md
     - ImageBind: examples/imagebind.md
