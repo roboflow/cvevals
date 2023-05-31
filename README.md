@@ -45,7 +45,7 @@ Out of the box, we have created examples that let you evaluate the performance o
 - BLIP (Classification)
 - ALBEF (Classification)
 - Grounding DINO (Object Detection)
-- BLIPv2 (Classification)
+- DINOv2 and SVM (Classification)
 - ImageBind (Classification)
 
 ## License
