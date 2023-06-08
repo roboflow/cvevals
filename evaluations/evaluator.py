@@ -56,15 +56,15 @@ class Evaluator:
         merged_data = {}
 
         for key in predictions.keys():
-            gt = ground_truth.get(key, [])
+            gt = ground_truth[key.split("/")[-1]]
 
-            if gt:
-                gt = gt["ground_truth"]
-            else:
-                gt = []
+            gts = [list(item) for item in gt.xyxy]
+
+            for idx, item in enumerate(gt.class_id):
+                gts[idx].append(item)
 
             merged_data[key] = {
-                "ground_truth": gt,
+                "ground_truth": gts,
                 "predictions": predictions[key]["predictions"],
                 "filename": key,
             }

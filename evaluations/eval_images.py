@@ -99,9 +99,11 @@ def visualize_image_experiment(img_eval_data: dict, class_names: list) -> None:
     predictions = img_eval_data["predictions"]
     ground_truth = img_eval_data["ground_truth"]
 
+    print(predictions)
+
     image = cv2.imread(img_filename)
 
-    output_image = draw_bounding_boxes(image, ground_truth, predictions, class_names)
+    # output_image = draw_bounding_boxes(image, ground_truth, predictions, class_names)
 
     base_file_name = img_filename.split("/")[-1]
 
@@ -109,4 +111,4 @@ def visualize_image_experiment(img_eval_data: dict, class_names: list) -> None:
 
     print(f"Saving image to ./output/images/{base_file_name}")
 
-    cv2.imwrite(f"./output/images/{base_file_name}", output_image)
+    # cv2.imwrite(f"./output/images/{base_file_name}", output_image)

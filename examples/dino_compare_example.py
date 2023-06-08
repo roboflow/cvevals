@@ -54,20 +54,26 @@ CONFIG_PATH = args.config_path
 WEIGHTS_PATH = args.weights_path
 
 # use validation set
-IMAGE_PATH = EVAL_DATA_PATH + "/valid/images"
+IMAGE_PATH = EVAL_DATA_PATH + "/train/images"
 
 class_names, ground_truth, model = RoboflowDataLoader(
     workspace_url=ROBOFLOW_WORKSPACE_URL,
     project_url=ROBOFLOW_PROJECT_URL,
     project_version=ROBOFLOW_MODEL_VERSION,
     image_files=EVAL_DATA_PATH,
-    model_type="object-detection"
+    model_type="object-detection",
+    dataset="train",
 ).download_dataset()
+
+ground_truth = sv.DetectionDataset.from_yolo(
+    images_directory_path=os.path.join(EVAL_DATA_PATH, "train/images"),
+    annotations_directory_path=os.path.join(EVAL_DATA_PATH, "train/labels"),
+    data_yaml_path=os.path.join(EVAL_DATA_PATH, "data.yaml"),
+)
 
 model = Model(
     model_config_path=CONFIG_PATH, model_checkpoint_path=WEIGHTS_PATH, device="cpu"
 )
-
 
 def get_dino_predictions(class_names: dict) -> dict:
     all_predictions = {}
@@ -97,34 +103,21 @@ def get_dino_predictions(class_names: dict) -> dict:
     return all_predictions
 
 evals = [
-    {"classes": [{"ground_truth": "", "inference": ""}], "confidence": 0.5},
+    {"classes": [{"ground_truth": "trash", "inference": "trash"}], "confidence": 0.5},
+    {"classes": [{"ground_truth": "trash", "inference": "rubbish"}], "confidence": 0.5},
+    {"classes": [{"ground_truth": "trash", "inference": "waste"}], "confidence": 0.5},
 ]
 
 # map eval inferences to ground truth
 for e in evals:
-    new_ground_truth = ground_truth.copy()
-
-    for key in new_ground_truth.keys():
-        result = list(new_ground_truth[key]["ground_truth"])
-
-        for idx, item in enumerate(result):
-            if item[4] == class_names.index(e["classes"][0]["ground_truth"]):
-                item = list(item)
-                item[4] = 0
-                result[idx] = tuple(item)
-
-        result = [item for item in result if item[4] == 0]
-
-        new_ground_truth[key]["ground_truth"] = result
-
-    evals[evals.index(e)]["ground_truth"] = new_ground_truth.copy()
+    evals[evals.index(e)]["ground_truth"] = ground_truth
     evals[evals.index(e)]["inference_class_names"] = [e["classes"][0]["inference"], "background"]
 
 best = CompareEvaluations(
     [
         Evaluator(
             predictions=get_dino_predictions(class_names=cn["classes"]),
-            ground_truth=cn["ground_truth"],
+            ground_truth=cn["ground_truth"].annotations,
             confidence_threshold=cn["confidence"],
             class_names=cn["inference_class_names"],
             name=cn["classes"][0]["inference"],
