@@ -56,18 +56,34 @@ class Evaluator:
         merged_data = {}
 
         for key in predictions.keys():
-            gt = ground_truth[key.split("/")[-1]]
+            gt = ground_truth.get(key, [])
 
-            gts = [list(item) for item in gt.xyxy]
+            # Key is the absolute path of the image, if splited and taken only filename
+            # it leads to a KeyError Exception because ground_truth has absolute paths
+            # gt = ground_truth[key.split("/")[-1]]
 
-            for idx, item in enumerate(gt.class_id):
-                gts[idx].append(item)
+            if gt:
+                gt = gt["ground_truth"]
+            else:
+                gt = []
 
             merged_data[key] = {
-                "ground_truth": gts,
+                "ground_truth": gt,
                 "predictions": predictions[key]["predictions"],
                 "filename": key,
             }
+
+            # gt does not have an attribute "xyxy", but it exist inside the "predictions" object
+            # gts = [list(item) for item in gt.xyxy]
+            #
+            # for idx, item in enumerate(gt.class_id):
+            #     gts[idx].append(item)
+            #
+            # merged_data[key] = {
+            #     "ground_truth": gts,
+            #     "predictions": predictions[key]["predictions"],
+            #     "filename": key,
+            # }
 
         self.data = merged_data
 
