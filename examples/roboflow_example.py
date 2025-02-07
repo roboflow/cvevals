@@ -22,6 +22,9 @@ parser.add_argument(
 parser.add_argument(
     "--roboflow_model_version", type=int, required=True, help="Roboflow model version"
 )
+parser.add_argument(
+    "--model_type", type=str, required=True, help="Roboflow model type"
+)
 
 args = parser.parse_args()
 
@@ -29,23 +32,25 @@ EVAL_DATA_PATH = args.eval_data_path
 ROBOFLOW_WORKSPACE_URL = args.roboflow_workspace_url
 ROBOFLOW_PROJECT_URL = args.roboflow_project_url
 ROBOFLOW_MODEL_VERSION = args.roboflow_model_version
+ROBOFLOW_MODEL_TYPE = args.model_type
 
 class_names, data, model = RoboflowDataLoader(
     workspace_url=ROBOFLOW_WORKSPACE_URL,
     project_url=ROBOFLOW_PROJECT_URL,
     project_version=ROBOFLOW_MODEL_VERSION,
     image_files=EVAL_DATA_PATH,
+    model_type=ROBOFLOW_MODEL_TYPE
 ).download_dataset()
 
 predictions = RoboflowPredictionsDataLoader(
     model=model,
-    model_type="object-detection",
+    model_type=ROBOFLOW_MODEL_TYPE,
     image_files=EVAL_DATA_PATH,
     class_names=class_names,
 ).process_files()
 
 evaluator = RoboflowEvaluator(
-    ground_truth=data, predictions=predictions, class_names=class_names, mode="batch"
+    ground_truth=data, predictions=predictions, class_names=class_names, mode="batch", model_type=ROBOFLOW_MODEL_TYPE
 )
 
 cf = evaluator.eval_model_predictions()
