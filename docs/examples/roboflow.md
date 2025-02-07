@@ -7,7 +7,9 @@ python3 examples/roboflow_example.py --eval_data_path <path_to_eval_data> \
 --roboflow_workspace_url <workspace_url> \
 --roboflow_project_url <project_url> \
 --roboflow_model_version <model_version>
+--model_type:<model-type>
 ```
+`model_type` accepts values for the type of model, as shown in [How to evaluate with CVevals](https://blog.roboflow.com/evaluate-computer-vision-models-cvevals/#step-3-run-the-evaluation)
 
 ## Compare Roboflow Model Versions
 
