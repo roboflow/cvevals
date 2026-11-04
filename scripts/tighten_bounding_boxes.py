@@ -64,7 +64,7 @@ from segment_anything import SamPredictor, sam_model_registry
 from evaluations.iou import box_iou
 
 sam = sam_model_registry["default"](
-    checkpoint=SAM_CHECKPOINT
+    checkpoint=args.sam_checkpoint
 )
 import numpy as np
 
